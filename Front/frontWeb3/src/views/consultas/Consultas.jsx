@@ -36,9 +36,15 @@ function Consultas() {
         setError("")
     }
 
+    const handleBack = () => {
+        setHasSearched(false)
+        setPatente("")
+        setError("")
+    }
+
     // Si hay datos y se ha buscado, mostrar solo el resultado
     if (hasSearched && dataAuto && dataAuto.id) {
-        return <VehicleDisplay vehicleData={dataAuto} />
+        return <VehicleDisplay vehicleData={dataAuto} onBack={handleBack} />
     }
 
     return (

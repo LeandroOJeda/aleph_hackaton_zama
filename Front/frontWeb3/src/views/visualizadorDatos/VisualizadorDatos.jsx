@@ -1,6 +1,6 @@
 import React from 'react'
 
-const VehicleDisplay = ({ vehicleData }) => {
+const VehicleDisplay = ({ vehicleData, onBack }) => {
     const {
         id,
         licensePlate,
@@ -190,6 +190,7 @@ const VehicleDisplay = ({ vehicleData }) => {
                         <div className="col-6">
                             <button
                                 className="btn w-100 fw-semibold"
+                                onClick={onBack}
                                 style={{
                                     backgroundColor: '#6c757d',
                                     color: 'white',
@@ -199,7 +200,7 @@ const VehicleDisplay = ({ vehicleData }) => {
                                     fontSize: '1rem'
                                 }}
                             >
-                                Limpiar
+                                Atrás
                             </button>
                         </div>
                         <div className="col-6">
