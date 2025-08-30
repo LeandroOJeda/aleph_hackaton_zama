@@ -1,6 +1,6 @@
 const express = require('express');
 const { asyncHandler } = require('../middleware/errorHandler');
-const zamaService = require('../services/zamaService');
+const sepoliaService = require('../services/sepoliaService');
 const { Block, BlockCollection } = require('../models/Block');
 const { createError } = require('../middleware/errorHandler');
 
@@ -11,7 +11,7 @@ const router = express.Router();
  * @desc Obtiene el último bloque de la blockchain
  */
 router.get('/latest', asyncHandler(async (req, res) => {
-  const blockData = await zamaService.getLatestBlock();
+  const blockData = await sepoliaService.getLatestBlock();
   
   if (!blockData) {
     throw createError('No se pudo obtener el último bloque', 404);
@@ -37,10 +37,10 @@ router.get('/:identifier', asyncHandler(async (req, res) => {
   // Determinar si es un hash (empieza con 0x y tiene 66 caracteres) o un número
   if (identifier.startsWith('0x') && identifier.length === 66) {
     // Es un hash
-    blockData = await zamaService.getBlockByHash(identifier);
+    blockData = await sepoliaService.getBlockByHash(identifier);
   } else if (/^\d+$/.test(identifier) || identifier.startsWith('0x')) {
     // Es un número (decimal o hexadecimal)
-    blockData = await zamaService.getBlockByNumber(identifier);
+    blockData = await sepoliaService.getBlockByNumber(identifier);
   } else {
     throw createError('Identificador de bloque inválido. Use un número o hash válido.', 400);
   }
@@ -81,7 +81,7 @@ router.get('/range/:start/:end', asyncHandler(async (req, res) => {
     throw createError(`El rango no puede exceder ${limit} bloques`, 400);
   }
 
-  const blocksData = await zamaService.getBlockRange(startBlock, endBlock, limit);
+  const blocks = await sepoliaService.getBlockRange(startBlock, endBlock, limit);
   const blockCollection = new BlockCollection(blocksData);
   
   res.json({
@@ -97,7 +97,7 @@ router.get('/range/:start/:end', asyncHandler(async (req, res) => {
  * @desc Obtiene estadísticas del último bloque
  */
 router.get('/stats/latest', asyncHandler(async (req, res) => {
-  const blockData = await zamaService.getLatestBlock();
+  const blockData = await sepoliaService.getLatestBlock();
   
   if (!blockData) {
     throw createError('No se pudo obtener el último bloque', 404);
@@ -117,7 +117,7 @@ router.get('/stats/latest', asyncHandler(async (req, res) => {
  * @desc Obtiene información general de la red
  */
 router.get('/network/info', asyncHandler(async (req, res) => {
-  const networkInfo = await zamaService.getNetworkInfo();
+  const networkInfo = await sepoliaService.getNetworkInfo();
   
   res.json({
     success: true,
@@ -131,7 +131,7 @@ router.get('/network/info', asyncHandler(async (req, res) => {
  * @desc Verifica el estado de conexión con la red
  */
 router.get('/network/status', asyncHandler(async (req, res) => {
-  const connectionStatus = await zamaService.checkConnection();
+  const connectionStatus = await sepoliaService.checkConnection();
   
   res.json({
     success: true,
@@ -159,7 +159,7 @@ router.get('/search', asyncHandler(async (req, res) => {
   
   // Si no se especifica rango, usar los últimos bloques
   if (!startBlock || !endBlock) {
-    const latestBlockNumber = await zamaService.getBlockNumber();
+    const latestBlockNumber = await sepoliaService.getBlockNumber();
     endBlock = endBlock || latestBlockNumber;
     startBlock = startBlock || Math.max(0, endBlock - parseInt(limit) + 1);
   }
@@ -168,7 +168,7 @@ router.get('/search', asyncHandler(async (req, res) => {
     throw createError(`El rango no puede exceder ${limit} bloques`, 400);
   }
 
-  const blocksData = await zamaService.getBlockRange(startBlock, endBlock, parseInt(limit));
+  const blocksData = await sepoliaService.getBlockRange(startBlock, endBlock, parseInt(limit));
   let blocks = blocksData.map(blockData => new Block(blockData));
 
   // Aplicar filtros
@@ -220,7 +220,7 @@ router.get('/', asyncHandler(async (req, res) => {
     throw createError('Los parámetros de paginación deben ser positivos', 400);
   }
 
-  const latestBlockNumber = await zamaService.getBlockNumber();
+  const latestBlockNumber = await sepoliaService.getBlockNumber();
   const startBlock = Math.max(0, latestBlockNumber - (pageNum * limitNum) + 1);
   const endBlock = Math.max(0, latestBlockNumber - ((pageNum - 1) * limitNum));
 
@@ -238,7 +238,7 @@ router.get('/', asyncHandler(async (req, res) => {
     });
   }
 
-  const blocksData = await zamaService.getBlockRange(startBlock, endBlock, limitNum);
+  const blocksData = await sepoliaService.getBlockRange(startBlock, endBlock, limitNum);
   const blocks = blocksData.map(blockData => {
     const block = new Block(blockData);
     return detailed === 'true' ? block.getDetailed() : block.getSummary();

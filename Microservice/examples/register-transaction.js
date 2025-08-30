@@ -2,11 +2,11 @@ import { ethers } from "ethers";
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-// Cargar el ABI del contrato directamente
+// Cargar el ABI del contrato
 const contractArtifact = require('../artifacts/contracts/TransactionRegistry.sol/VehicleInfoRegistry.json');
 
 // Dirección del contrato desplegado
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
 async function registerVehicleBlock() {
   console.log("🚀 Registrando nuevo bloque de información vehicular en la blockchain...");

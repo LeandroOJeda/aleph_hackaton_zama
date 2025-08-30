@@ -1,4 +1,10 @@
-const { ethers } = require('hardhat');
+import { ethers } from "ethers";
+import { createRequire } from 'module';
+import dotenv from 'dotenv';
+const require = createRequire(import.meta.url);
+
+// Cargar variables de entorno
+dotenv.config();
 
 // Cargar el ABI del contrato
 const contractArtifact = require('../artifacts/contracts/TransactionRegistry.sol/VehicleInfoRegistry.json');
@@ -8,23 +14,23 @@ async function demoCompleto() {
         console.log('🚗 Demo completo del sistema de bloques de información vehicular');
         console.log('=' .repeat(70));
         
-        // Configuración de la red local
-        const provider = new ethers.JsonRpcProvider('http://localhost:8545');
-        const wallet = new ethers.Wallet('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80', provider);
+        // Configuración de la red Sepolia
+        const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID');
+        const wallet = new ethers.Wallet(process.env.SEPOLIA_PRIVATE_KEY, provider);
         
         // Dirección del contrato desplegado
-        const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+        const contractAddress = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
         
         // Crear instancia del contrato
         const contract = new ethers.Contract(contractAddress, contractArtifact.abi, wallet);
         
-        const vehicleId = 'ABC123';
+        const vehicleId = 'DEF456'; // Usar un vehículo diferente
         
         // Ejemplo 1: Seguro
         console.log('\n📋 Ejemplo 1: Registro de seguro');
         await crearBloque(contract, {
             vehicleId: vehicleId,
-            kilometros: 25000,
+            kilometros: 50000,
             detalles: 'aseguro el auto con La Caja Seguros - Póliza completa con cobertura total contra todo riesgo',
             origen: 'La Caja Seguros'
         });
@@ -33,7 +39,7 @@ async function demoCompleto() {
         console.log('\n📋 Ejemplo 2: Service mecánico');
         await crearBloque(contract, {
             vehicleId: vehicleId,
-            kilometros: 30000,
+            kilometros: 55000,
             detalles: 'hizo un service al auto con cambio de aceite, filtros de aire y combustible, revisión de frenos',
             origen: 'Taller Mecánico Rodriguez'
         });
@@ -42,7 +48,7 @@ async function demoCompleto() {
         console.log('\n📋 Ejemplo 3: Verificación técnica vehicular');
         await crearBloque(contract, {
             vehicleId: vehicleId,
-            kilometros: 32000,
+            kilometros: 57000,
             detalles: 'realizó verificación técnica vehicular (VTV) - Aprobada sin observaciones',
             origen: 'Centro de Verificación Técnica'
         });
@@ -57,7 +63,7 @@ async function demoCompleto() {
         console.log('\n📋 Ejemplo 4: Reparación');
         await crearBloque(contract, {
             vehicleId: vehicleId,
-            kilometros: 35000,
+            kilometros: 60000,
             detalles: 'reparó el sistema de frenos - Cambio de pastillas y discos delanteros',
             origen: 'Taller de Frenos Especializado'
         });

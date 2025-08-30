@@ -70,6 +70,162 @@ Luego ejecuta el despliegue:
 npx hardhat ignition deploy --network sepolia ignition/modules/VehicleInfoRegistry.ts
 ```
 
+## API Endpoints
+
+### Endpoints de Bloques de la Blockchain
+
+La API Express proporciona los siguientes endpoints para consultar información de la blockchain:
+
+#### 1. Obtener el último bloque
+```http
+GET /api/blocks/latest
+```
+
+**Respuesta:**
+```json
+{
+  "number": "0x1b4",
+  "hash": "0x...",
+  "parentHash": "0x...",
+  "timestamp": "0x...",
+  "transactions": [...]
+}
+```
+
+#### 2. Obtener bloque por número o hash
+```http
+GET /api/blocks/:identifier
+```
+
+**Parámetros:**
+- `identifier`: Número de bloque (decimal o hex) o hash del bloque
+
+**Ejemplos:**
+```bash
+# Por número de bloque
+curl http://localhost:3000/api/blocks/100
+
+# Por hash
+curl http://localhost:3000/api/blocks/0x1234567890abcdef...
+```
+
+#### 3. Obtener rango de bloques
+```http
+GET /api/blocks/range/:start/:end
+```
+
+**Parámetros:**
+- `start`: Número de bloque inicial
+- `end`: Número de bloque final (máximo 10 bloques)
+
+**Ejemplo:**
+```bash
+curl http://localhost:3000/api/blocks/range/100/105
+```
+
+#### 4. Obtener estadísticas del último bloque
+```http
+GET /api/blocks/stats/latest
+```
+
+#### 5. Obtener información de la red
+```http
+GET /api/blocks/network/info
+```
+
+**Respuesta:**
+```json
+{
+  "chainId": 8009,
+  "latestBlock": 436,
+  "gasPrice": 1000000000,
+  "networkId": "8009",
+  "rpcUrl": "https://devnet.zama.ai"
+}
+```
+
+#### 6. Verificar estado de conexión
+```http
+GET /api/blocks/network/status
+```
+
+#### 7. Buscar bloques con filtros
+```http
+GET /api/blocks/search?startBlock=100&endBlock=200&minTxCount=5
+```
+
+**Parámetros de consulta opcionales:**
+- `startBlock`: Bloque inicial para la búsqueda
+- `endBlock`: Bloque final para la búsqueda
+- `miner`: Dirección del minero
+- `minTxCount`: Número mínimo de transacciones
+- `maxTxCount`: Número máximo de transacciones
+
+#### 8. Listar bloques con paginación
+```http
+GET /api/blocks?page=1&limit=10&details=true
+```
+
+**Parámetros de consulta:**
+- `page`: Número de página (por defecto: 1)
+- `limit`: Elementos por página (por defecto: 10, máximo: 50)
+- `details`: Incluir detalles completos (por defecto: false)
+
+### Endpoints para Contratos Inteligentes (Propuestos)
+
+> **Nota:** Los siguientes endpoints están propuestos para interactuar con el contrato `VehicleInfoRegistry`. Actualmente, la interacción con el contrato se realiza directamente usando los ejemplos en la carpeta `examples/`.
+
+#### 1. Crear bloque de información vehicular
+```http
+POST /api/vehicles/blocks
+```
+
+**Cuerpo de la solicitud:**
+```json
+{
+  "vehicleId": "ABC123",
+  "kilometros": 25000,
+  "detalles": "Mantenimiento preventivo realizado",
+  "origen": "Taller Mecánico XYZ",
+  "privateKey": "0x..." // Clave privada para firmar la transacción
+}
+```
+
+#### 2. Obtener información de un vehículo
+```http
+GET /api/vehicles/:vehicleId
+```
+
+**Respuesta:**
+```json
+{
+  "vehicleId": "ABC123",
+  "activo": true,
+  "poseeVTV": false,
+  "ultimoKilometraje": 25000,
+  "existe": true
+}
+```
+
+#### 3. Obtener bloques de un vehículo
+```http
+GET /api/vehicles/:vehicleId/blocks
+```
+
+#### 4. Actualizar estado de vehículo
+```http
+PUT /api/vehicles/:vehicleId/status
+```
+
+**Cuerpo de la solicitud:**
+```json
+{
+  "activo": true,
+  "poseeVTV": true,
+  "privateKey": "0x..."
+}
+```
+
 ### Ejemplos de Uso
 
 Consulta la carpeta `examples/` para ver casos de uso específicos:

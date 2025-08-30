@@ -2,34 +2,37 @@ import { ethers } from "ethers";
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-// Cargar el ABI del contrato directamente
-const contractArtifact = require('../artifacts/contracts/TransactionRegistry.sol/TransactionRegistry.json');
+// Cargar el ABI del contrato VehicleInfoRegistry
+const contractArtifact = require('../artifacts/contracts/TransactionRegistry.sol/VehicleInfoRegistry.json');
 
 // Configuración
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 const RPC_URL = "http://127.0.0.1:8545";
 
 /**
- * Función rápida para registrar una transacción
- * @param {string} descripcion - Descripción del transporte
- * @param {number} kilometros - Distancia en kilómetros
- * @param {string} empresaOrigen - Empresa que envía
- * @param {string} empresaDestino - Empresa que recibe
+ * Función rápida para registrar información vehicular
+ * @param {string} vehicleId - ID del vehículo
+ * @param {number} kilometros - Kilometraje actual
+ * @param {string} detalles - Detalles del registro
+ * @param {string} origen - Origen del registro (taller, concesionario, etc.)
  */
-export async function registrarTransaccion(descripcion, kilometros, empresaOrigen, empresaDestino) {
+export async function registrarInfoVehicular(vehicleId, kilometros, detalles, origen) {
   try {
     // Validaciones básicas
-    if (!descripcion || descripcion.trim() === "") {
-      throw new Error("La descripción no puede estar vacía");
+    if (!vehicleId || vehicleId.trim() === "") {
+      throw new Error("El ID del vehículo no puede estar vacío");
     }
     if (!kilometros || kilometros <= 0) {
       throw new Error("Los kilómetros deben ser mayor a 0");
     }
-    if (!empresaOrigen || !empresaDestino) {
-      throw new Error("Debe especificar empresa origen y destino");
+    if (!detalles || detalles.trim() === "") {
+      throw new Error("Los detalles no pueden estar vacíos");
+    }
+    if (!origen || origen.trim() === "") {
+      throw new Error("El origen no puede estar vacío");
     }
 
-    console.log("🚀 Registrando transacción...");
+    console.log("🚀 Registrando información vehicular...");
     
     // Conectar a la blockchain
     const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -39,21 +42,21 @@ export async function registrarTransaccion(descripcion, kilometros, empresaOrige
     const contract = new ethers.Contract(CONTRACT_ADDRESS, contractArtifact.abi, signer);
     
     // Enviar transacción
-    const tx = await contract.createTransaction(
-      descripcion,
+    const tx = await contract.createInfoBlock(
+      vehicleId,
       kilometros,
-      empresaOrigen,
-      empresaDestino
+      detalles,
+      origen
     );
     
     console.log("⏳ Esperando confirmación...");
     const receipt = await tx.wait();
     
-    // Obtener ID de la transacción
+    // Obtener ID del bloque de información
     const event = receipt.logs.find(log => {
       try {
         const parsed = contract.interface.parseLog(log);
-        return parsed.name === "TransactionCreated";
+        return parsed.name === "InfoBlockCreated";
       } catch {
         return false;
       }
@@ -61,16 +64,19 @@ export async function registrarTransaccion(descripcion, kilometros, empresaOrige
     
     if (event) {
       const parsedEvent = contract.interface.parseLog(event);
-      const transactionId = parsedEvent.args[0];
+      const blockId = parsedEvent.args[0];
+      const vehicleId = parsedEvent.args[1];
       
-      console.log("✅ ¡Transacción registrada exitosamente!");
-      console.log("🆔 ID:", transactionId.toString());
+      console.log("✅ ¡Información vehicular registrada exitosamente!");
+      console.log("🆔 ID del bloque:", blockId.toString());
+      console.log("🚗 Vehículo:", vehicleId);
       console.log("📋 Hash:", tx.hash);
       console.log("🧱 Bloque:", receipt.blockNumber);
       
       return {
         success: true,
-        transactionId: transactionId.toString(),
+        blockId: blockId.toString(),
+        vehicleId: vehicleId,
         hash: tx.hash,
         blockNumber: receipt.blockNumber
       };
@@ -86,93 +92,91 @@ export async function registrarTransaccion(descripcion, kilometros, empresaOrige
 }
 
 /**
- * Función para consultar una transacción específica
- * @param {number} transactionId - ID de la transacción
+ * Función para consultar información vehicular específica
+ * @param {string} vehicleId - ID del vehículo a consultar
  */
-export async function consultarTransaccion(transactionId) {
+export async function consultarInfoVehicular(vehicleId) {
   try {
+    console.log(`🔍 Consultando información del vehículo ${vehicleId}...`);
+    
     const provider = new ethers.JsonRpcProvider(RPC_URL);
-    const signer = await provider.getSigner(0);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, contractArtifact.abi, provider);
     
-    // Usar el ABI del contrato cargado
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, contractArtifact.abi, signer);
+    // Obtener datos del vehículo
+    const vehicleInfo = await contract.getVehicleInfo(vehicleId);
     
-    const exists = await contract.transactionExists(transactionId);
-    if (!exists) {
-      throw new Error(`La transacción ${transactionId} no existe`);
-    }
+    console.log("📋 Información del vehículo:");
+    console.log("🚗 ID del vehículo:", vehicleId);
+    console.log("📏 Kilómetros:", vehicleInfo.kilometers.toString());
+    console.log("📝 Detalles:", vehicleInfo.details);
+    console.log("🏢 Origen:", vehicleInfo.origin);
+    console.log("✅ Activo:", vehicleInfo.isActive);
+    console.log("🔧 VTV válida:", vehicleInfo.hasValidVTV);
+    console.log("⏰ Última actualización:", new Date(Number(vehicleInfo.lastUpdate) * 1000).toLocaleString());
     
-    const tx = await contract.getTransaction(transactionId);
-    
-    const result = {
-      id: tx[0].toString(),
-      descripcion: tx[1],
-      kilometros: tx[2].toString(),
-      empresaOrigen: tx[3],
-      empresaDestino: tx[4],
-      creadoPor: tx[5],
-      fecha: new Date(Number(tx[6]) * 1000).toLocaleString()
+    return {
+      vehicleId: vehicleId,
+      kilometers: vehicleInfo.kilometers.toString(),
+      details: vehicleInfo.details,
+      origin: vehicleInfo.origin,
+      isActive: vehicleInfo.isActive,
+      hasValidVTV: vehicleInfo.hasValidVTV,
+      lastUpdate: Number(vehicleInfo.lastUpdate)
     };
-    
-    console.log("📋 Transacción encontrada:");
-    console.log("🆔 ID:", result.id);
-    console.log("📝 Descripción:", result.descripcion);
-    console.log("📏 Kilómetros:", result.kilometros);
-    console.log("🏢 De:", result.empresaOrigen);
-    console.log("🏢 Para:", result.empresaDestino);
-    console.log("👤 Creado por:", result.creadoPor);
-    console.log("📅 Fecha:", result.fecha);
-    
-    return result;
-    
   } catch (error) {
-    console.error("❌ Error:", error.message);
-    return null;
+    console.error("❌ Error al consultar información vehicular:", error.message);
+    throw error;
   }
 }
 
 /**
- * Función para obtener el total de transacciones
+ * Función para obtener el total de bloques de información
  */
-export async function obtenerTotalTransacciones() {
+export async function obtenerTotalBloques() {
   try {
+    console.log("📊 Obteniendo total de bloques de información...");
+    
     const provider = new ethers.JsonRpcProvider(RPC_URL);
-    const signer = await provider.getSigner(0);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, contractArtifact.abi, provider);
     
-    // Usar el ABI del contrato cargado
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, contractArtifact.abi, signer);
+    const total = await contract.getTotalInfoBlocks();
     
-    const total = await contract.getTransactionCount();
-    console.log("📊 Total de transacciones:", total.toString());
+    console.log("📈 Total de bloques de información:", total.toString());
     
     return Number(total);
-    
   } catch (error) {
-    console.error("❌ Error:", error.message);
-    return 0;
+    console.error("❌ Error al obtener total:", error.message);
+    throw error;
   }
 }
 
-// Ejemplos de uso si se ejecuta directamente
+// Ejemplo de uso
 if (import.meta.url === `file://${process.argv[1]}`) {
-  console.log("🌟 === EJEMPLOS DE USO ===");
-  
-  // Ejemplo 1: Registrar una transacción
-  console.log("\n1️⃣ Registrando transacción de ejemplo...");
-  await registrarTransaccion(
-    "Envío de productos electrónicos",
-    450,
-    "TechCorp Madrid",
-    "ElectroStore Valencia"
-  );
-  
-  // Ejemplo 2: Consultar total
-  console.log("\n2️⃣ Consultando total de transacciones...");
-  const total = await obtenerTotalTransacciones();
-  
-  // Ejemplo 3: Consultar la última transacción
-  if (total > 0) {
-    console.log("\n3️⃣ Consultando última transacción...");
-    await consultarTransaccion(total);
-  }
+  (async () => {
+    try {
+      console.log("🚀 Iniciando ejemplo de registro vehicular...");
+      
+      // Registrar información vehicular
+      const resultado = await registrarInfoVehicular(
+        "ABC123",
+        45000,
+        "Mantenimiento preventivo realizado",
+        "Taller Oficial Honda"
+      );
+      
+      if (resultado.success) {
+        console.log("\n⏳ Esperando 2 segundos antes de consultar...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Consultar la información vehicular recién creada
+        await consultarInfoVehicular(resultado.vehicleId);
+        
+        // Obtener total de bloques de información
+        await obtenerTotalBloques();
+      }
+      
+    } catch (error) {
+      console.error("💥 Error en el ejemplo:", error.message);
+    }
+  })();
 }

@@ -4,20 +4,20 @@ import { describe, it } from "node:test";
 import { network } from "hardhat";
 
 describe("VehicleInfoRegistry", async function () {
-  const { viem } = await network.connect();
-  const publicClient = await viem.getPublicClient();
-  const [deployer, user1, user2] = await viem.getWalletClients();
+  const hre = await network.connect();
+  const publicClient = await hre.viem.getPublicClient();
+  const [deployer, user1, user2] = await hre.viem.getWalletClients();
 
   it("Should start with zero info blocks", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
     const count = await registry.read.getBlockCount();
     assert.equal(count, 0n);
   });
 
   it("Should create an info block and emit InfoBlockCreated event", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
-    await viem.assertions.emitWithArgs(
+    await hre.viem.assertions.emitWithArgs(
       registry.write.createInfoBlock([
         "ABC123",
         25000n,
@@ -31,7 +31,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should create and retrieve an info block correctly", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     await registry.write.createInfoBlock([
       "ABC123",
@@ -52,7 +52,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should reject info block with empty vehicle ID", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     try {
       await registry.write.createInfoBlock([
@@ -68,7 +68,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should reject info block with zero km", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     try {
       await registry.write.createInfoBlock([
@@ -84,7 +84,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should update info block by creator", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     await registry.write.createInfoBlock([
       "ABC123",
@@ -93,7 +93,7 @@ describe("VehicleInfoRegistry", async function () {
       "La Caja Seguros"
     ]);
 
-    await viem.assertions.emitWithArgs(
+    await hre.viem.assertions.emitWithArgs(
       registry.write.updateInfoBlock([
         1n,
         "ABC123",
@@ -112,7 +112,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should reject update from non-creator", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     await registry.write.createInfoBlock([
       "ABC123",
@@ -121,7 +121,7 @@ describe("VehicleInfoRegistry", async function () {
       "La Caja Seguros"
     ]);
 
-    const registryAsUser1 = await viem.getContractAt("VehicleInfoRegistry", registry.address, { client: { wallet: user1 } });
+    const registryAsUser1 = await hre.viem.getContractAt("VehicleInfoRegistry", registry.address, { client: { wallet: user1 } });
 
     try {
       await registryAsUser1.write.updateInfoBlock([
@@ -138,14 +138,14 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should track info blocks by creator", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     // Create blocks with deployer
     await registry.write.createInfoBlock(["ABC123", 25000n, "aseguro el auto", "La Caja Seguros"]);
     await registry.write.createInfoBlock(["DEF456", 15000n, "service mecanico", "Taller Perez"]);
 
     // Create block with user1
-    const registryAsUser1 = await viem.getContractAt("VehicleInfoRegistry", registry.address, { client: { wallet: user1 } });
+    const registryAsUser1 = await hre.viem.getContractAt("VehicleInfoRegistry", registry.address, { client: { wallet: user1 } });
     await registryAsUser1.write.createInfoBlock(["GHI789", 30000n, "verificacion tecnica", "VTV Centro"]);
 
     const deployerBlocks = await registry.read.getBlocksByCreator([deployer.account.address]);
@@ -159,7 +159,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should check info block existence correctly", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     assert.equal(await registry.read.blockExists([1n]), false);
     
@@ -170,7 +170,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should manage vehicle information correctly", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     // Create first block for vehicle
     await registry.write.createInfoBlock(["ABC123", 25000n, "aseguro el auto", "La Caja Seguros"]);
@@ -190,7 +190,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should get vehicle blocks correctly", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     // Create multiple blocks for same vehicle
     await registry.write.createInfoBlock(["ABC123", 25000n, "aseguro el auto", "La Caja Seguros"]);
@@ -204,7 +204,7 @@ describe("VehicleInfoRegistry", async function () {
   });
 
   it("Should prevent mileage decrease", async function () {
-    const registry = await viem.deployContract("VehicleInfoRegistry");
+    const registry = await hre.viem.deployContract("VehicleInfoRegistry");
 
     // Create first block
     await registry.write.createInfoBlock(["ABC123", 25000n, "aseguro el auto", "La Caja Seguros"]);

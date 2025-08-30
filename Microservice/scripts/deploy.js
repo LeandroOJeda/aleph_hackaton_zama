@@ -2,7 +2,7 @@ import hre from "hardhat";
 import { ethers } from "ethers";
 
 async function main() {
-  console.log("Deploying TransactionRegistry contract...");
+  console.log("Deploying VehicleInfoRegistry contract...");
 
   // Get provider and signer
   const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
@@ -11,7 +11,7 @@ async function main() {
   console.log("Account balance:", ethers.formatEther(await provider.getBalance(await signer.getAddress())), "ETH");
 
   // Get contract factory from artifacts
-  const contractArtifact = await hre.artifacts.readArtifact("TransactionRegistry");
+  const contractArtifact = await hre.artifacts.readArtifact("VehicleInfoRegistry");
   const contractFactory = new ethers.ContractFactory(
     contractArtifact.abi,
     contractArtifact.bytecode,
@@ -19,13 +19,13 @@ async function main() {
   );
 
   // Deploy the contract
-  const TransactionRegistry = contractFactory;
-  const transactionRegistry = await TransactionRegistry.deploy();
+  const VehicleInfoRegistry = contractFactory;
+  const vehicleInfoRegistry = await VehicleInfoRegistry.deploy();
 
-  await transactionRegistry.waitForDeployment();
+  await vehicleInfoRegistry.waitForDeployment();
 
-  console.log("TransactionRegistry deployed to:", await transactionRegistry.getAddress());
-  console.log("Transaction hash:", transactionRegistry.deploymentTransaction().hash);
+  console.log("VehicleInfoRegistry deployed to:", await vehicleInfoRegistry.getAddress());
+  console.log("Transaction hash:", vehicleInfoRegistry.deploymentTransaction().hash);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
