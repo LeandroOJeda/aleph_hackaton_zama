@@ -11,6 +11,11 @@ const blockRoutes = require('./routes/blocks');
 const vehicleRoutes = require('./routes/vehicles');
 const { errorHandler } = require('./middleware/errorHandler');
 
+// Patch BigInt to be serializable
+BigInt.prototype.toJSON = function() {
+  return this.toString();
+};
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
