@@ -1,0 +1,70 @@
+import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { User } from './entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { Role } from './entities/role.entity';
+import { ChangeDefaultPasswordDto } from './dto/change_default_password_dto';
+export declare class AuthService {
+    private readonly userRepository;
+    private readonly roleRepository;
+    private readonly jwtService;
+    private readonly configService;
+    constructor(userRepository: Repository<User>, roleRepository: Repository<Role>, jwtService: JwtService, configService: ConfigService);
+    createUser(createUserDto: CreateUserDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        isActive: boolean;
+        firstTime: boolean;
+        createdAt: Date;
+        roles: Role[];
+    }>;
+    loginUser(loginUserDto: LoginUserDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        isActive: boolean;
+        firstTime: boolean;
+        createdAt: Date;
+        roles: Role[];
+    }>;
+    refreshToken(user: User): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        isActive: boolean;
+        firstTime: boolean;
+        createdAt: Date;
+        roles: Role[];
+    }>;
+    changeDefaultPassword(changeDefaultPasswordDto: ChangeDefaultPasswordDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        isActive: boolean;
+        firstTime: boolean;
+        createdAt: Date;
+        roles: Role[];
+    }>;
+    private handleDBError;
+    private getJwtToken;
+    private getRefreshToken;
+}
