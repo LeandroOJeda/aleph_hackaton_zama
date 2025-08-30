@@ -27,7 +27,7 @@ export const logIn = (user, navigate, Swal) => {
         const roles = userLogged.data.roles;
         localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("roles", roles);
+        localStorage.setItem("roles", JSON.stringify(roles));
         Swal.fire({
           text: "Acceso concedido",
           icon: "success",
@@ -81,23 +81,22 @@ export const getAuto = (patente) => {
     console.log("llega al action");
   
     try {
-
       const response = await axios.get(`/api/v1/vehicles/${patente}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         }
       })
       
-      if (response) {
-        dispatch({type:"DATA_AUTO", payload:response.data})
-      }
-
-      console.log(response.data);
+      console.log("Response data:", response.data);
       
-    
+      if (response && response.data) {
+        dispatch({type:"DATA_AUTO", payload: response.data})
+        return response.data;
+      }
+      
     } catch (error) {
-      console.log(error.message);
-    
+      console.log("Error en getAuto:", error.message);
+      dispatch({type:"DATA_AUTO", payload: null});
     }
   }
 }

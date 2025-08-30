@@ -1,0 +1,212 @@
+.navbar {
+  background: #1f2937;
+  border-bottom: 1px solid #374151;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.navbarContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  height: 64px;
+}
+
+.navbarBrand {
+  display: flex;
+  align-items: center;
+}
+
+.brandButton {
+  background: none;
+  border: none;
+  color: #f9fafb;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.brandButton:hover {
+  color: #60a5fa;
+}
+
+.navbarCenter {
+  display: flex;
+  align-items: center;
+}
+
+.roleDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #374151;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #4b5563;
+}
+
+.roleLabel {
+  color: #9ca3af;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.roleBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Colores específicos por rol */
+.superadmin {
+  background: #dc2626;
+  color: white;
+}
+
+.admin {
+  background: #7c3aed;
+  color: white;
+}
+
+.aseguradora {
+  background: #059669;
+  color: white;
+}
+
+.taller {
+  background: #d97706;
+  color: white;
+}
+
+.concesionaria {
+  background: #2563eb;
+  color: white;
+}
+
+.consumer {
+  background: #6b7280;
+  color: white;
+}
+
+.navbarActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.createEventButton,
+.logoutButton {
+  height: 36px;
+  padding: 0 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: inherit;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.createEventButton {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.createEventButton:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.logoutButton {
+  background: transparent;
+  color: #d1d5db;
+  border-color: #4b5563;
+}
+
+.logoutButton:hover {
+  background: #374151;
+  color: #f3f4f6;
+  border-color: #6b7280;
+}
+
+.buttonIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbarContainer {
+    padding: 0 1rem;
+    height: 56px;
+  }
+
+  .brandButton {
+    font-size: 1.125rem;
+  }
+
+  .roleLabel {
+    display: none;
+  }
+
+  .createEventButton,
+  .logoutButton {
+    height: 32px;
+    padding: 0 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .buttonIcon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbarContainer {
+    flex-direction: column;
+    height: auto;
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .navbarBrand,
+  .navbarCenter,
+  .navbarActions {
+    width: 100%;
+  }
+
+  .navbarCenter {
+    justify-content: flex-start;
+  }
+
+  .navbarActions {
+    justify-content: flex-start;
+  }
+
+  .createEventButton,
+  .logoutButton {
+    height: 36px;
+    flex: 1;
+    justify-content: center;
+  }
+}

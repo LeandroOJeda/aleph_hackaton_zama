@@ -1,0 +1,243 @@
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { createEvent } from '../../redux/action';
+import styles from '../aseguradoras_form/AseguradorasForm.module.css';
+
+function SuperAdminEventForm() {
+    const dispatch = useDispatch();
+    const [formData, setFormData] = useState({
+        kilometers: '',
+        description: '',
+        eventDate: '',
+        location: '',
+        vehicleId: '',
+        eventType: 'system_maintenance', // Campo específico para SuperAdmin
+        priority: 'high'
+    });
+    const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState('');
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+        
+        if (errors[name]) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                [name]: ''
+            }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!formData.kilometers || formData.kilometers <= 0) {
+            newErrors.kilometers = 'Los kilómetros son requeridos y deben ser mayor a 0';
+        }
+
+        if (!formData.description.trim()) {
+            newErrors.description = 'La descripción es requerida';
+        }
+
+        if (!formData.eventDate) {
+            newErrors.eventDate = 'La fecha del evento es requerida';
+        }
+
+        if (!formData.location.trim()) {
+            newErrors.location = 'La ubicación es requerida';
+        }
+
+        if (!formData.vehicleId.trim()) {
+            newErrors.vehicleId = 'El ID del vehículo es requerido';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSubmitMessage('');
+
+        try {
+            const eventData = {
+                ...formData,
+                kilometers: parseInt(formData.kilometers),
+                eventDate: new Date(formData.eventDate).toISOString()
+            };
+
+            await dispatch(createEvent(eventData));
+            setSubmitMessage('Evento de SuperAdmin creado exitosamente');
+            
+            setFormData({
+                kilometers: '',
+                description: '',
+                eventDate: '',
+                location: '',
+                vehicleId: '',
+                eventType: 'system_maintenance',
+                priority: 'high'
+            });
+
+        } catch (error) {
+            setSubmitMessage('Error al crear el evento. Por favor intente nuevamente.');
+            console.error('Error:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleReset = () => {
+        setFormData({
+            kilometers: '',
+            description: '',
+            eventDate: '',
+            location: '',
+            vehicleId: '',
+            eventType: 'system_maintenance',
+            priority: 'high'
+        });
+        setErrors({});
+        setSubmitMessage('');
+    };
+
+    return (
+        <div className={styles.bigDiv}>
+            <div className={styles.divForm}>
+                <h1 className={styles.titulo}>Registro de Evento - Super Administrador</h1>
+                
+                <form className={styles.form} onSubmit={handleSubmit}>
+                    <div className={styles.divInput}>
+                        <select
+                            name="eventType"
+                            value={formData.eventType}
+                            onChange={handleChange}
+                            className={errors.eventType ? styles.inputError : ''}
+                        >
+                            <option value="system_maintenance">Mantenimiento del Sistema</option>
+                            <option value="security_audit">Auditoría de Seguridad</option>
+                            <option value="data_migration">Migración de Datos</option>
+                            <option value="system_upgrade">Actualización del Sistema</option>
+                        </select>
+                        {errors.eventType && <span className={styles.errorLabel}>{errors.eventType}</span>}
+                    </div>
+
+                    <div className={styles.divInput}>
+                        <select
+                            name="priority"
+                            value={formData.priority}
+                            onChange={handleChange}
+                            className={errors.priority ? styles.inputError : ''}
+                        >
+                            <option value="low">Prioridad Baja</option>
+                            <option value="medium">Prioridad Media</option>
+                            <option value="high">Prioridad Alta</option>
+                            <option value="critical">Crítica</option>
+                        </select>
+                        {errors.priority && <span className={styles.errorLabel}>{errors.priority}</span>}
+                    </div>
+
+                    <div className={styles.divInput}>
+                        <input
+                            type="number"
+                            name="kilometers"
+                            placeholder="Kilómetros"
+                            value={formData.kilometers}
+                            onChange={handleChange}
+                            className={errors.kilometers ? styles.inputError : ''}
+                            min="0"
+                        />
+                        {errors.kilometers && <span className={styles.errorLabel}>{errors.kilometers}</span>}
+                    </div>
+
+                    <div className={styles.divInput}>
+                        <textarea
+                            name="description"
+                            placeholder="Descripción del evento (incluya detalles técnicos)"
+                            value={formData.description}
+                            onChange={handleChange}
+                            className={`${styles.textarea} ${errors.description ? styles.inputError : ''}`}
+                            rows="4"
+                        />
+                        {errors.description && <span className={styles.errorLabel}>{errors.description}</span>}
+                    </div>
+
+                    <div className={styles.divInput}>
+                        <input
+                            type="datetime-local"
+                            name="eventDate"
+                            value={formData.eventDate}
+                            onChange={handleChange}
+                            className={errors.eventDate ? styles.inputError : ''}
+                        />
+                        {errors.eventDate && <span className={styles.errorLabel}>{errors.eventDate}</span>}
+                    </div>
+
+                    <div className={styles.divInput}>
+                        <input
+                            type="text"
+                            name="location"
+                            placeholder="Ubicación del evento"
+                            value={formData.location}
+                            onChange={handleChange}
+                            className={errors.location ? styles.inputError : ''}
+                        />
+                        {errors.location && <span className={styles.errorLabel}>{errors.location}</span>}
+                    </div>
+
+                    <div className={styles.divInput}>
+                        <input
+                            type="text"
+                            name="vehicleId"
+                            placeholder="ID del Vehículo"
+                            value={formData.vehicleId}
+                            onChange={handleChange}
+                            className={errors.vehicleId ? styles.inputError : ''}
+                        />
+                        {errors.vehicleId && <span className={styles.errorLabel}>{errors.vehicleId}</span>}
+                    </div>
+
+                    <div className={styles.divButton}>
+                        <button 
+                            type="button" 
+                            className={styles.button1}
+                            onClick={handleReset}
+                            disabled={isSubmitting}
+                        >
+                            Limpiar
+                        </button>
+                        
+                        <button 
+                            type="submit" 
+                            className={styles.button2}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Enviando...' : 'Crear Evento'}
+                        </button>
+                    </div>
+                </form>
+
+                {submitMessage && (
+                    <div className={`${styles.message} ${
+                        submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
+                    }`}>
+                        {submitMessage}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default SuperAdminEventForm;
