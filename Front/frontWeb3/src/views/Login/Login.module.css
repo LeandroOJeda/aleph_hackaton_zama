@@ -1,0 +1,109 @@
+.form {
+  width: 85%;
+}
+
+.bigDiv {
+  height: 50em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to bottom right,
+      rgba(62, 108, 81, 0.1),
+      rgba(62, 108, 81, 0.9)),
+    url("./../../image/tramaEcoGris.svg");
+  background-size: 100%;
+  background-repeat: repeat;
+  padding-top: 0;
+  margin-top: 0em;
+  width: 100%;
+}
+
+.divForm {
+  height: 22em;
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1.5em;
+  background-color: #eaeaea;
+  border: 1px solid #9c9c9c;
+  border-radius: 3px;
+}
+
+.titulo {
+  margin-bottom: 1em;
+  color: #17a2b8;
+}
+
+.divInput {
+  height: 4em;
+  display: grid;
+  grid-template-rows: 2.6em 1em;
+}
+
+.errorLabel {
+  justify-self: flex-start;
+  color: red;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+.divButton {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 8em 1fr 8em;
+}
+
+.button1 {
+  background-color: #17a2b8;
+  /* Color de fondo del botón */
+  border-color: #17a2b8;
+  /* Color del borde del botón */
+  color: white;
+  /* Color del texto del botón */
+  margin-top: 2em;
+  align-self: flex-start;
+  margin-left: 0;
+  grid-column: 1;
+}
+
+.button2 {
+  background-color: #17a2b8;
+  /* Color de fondo del botón */
+  border-color: #17a2b8;
+  /* Color del borde del botón */
+  color: white;
+  /* Color del texto del botón */
+  margin-top: 2em;
+  align-self: flex-start;
+  margin-left: 0;
+  grid-column: 3;
+}
+
+/* Dispositivos móviles */
+@media (max-width: 767px) {
+  .divForm {
+    width: 80%;
+  }
+
+  .divButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .button1 {
+    align-self: center;
+    margin-top: 1em;
+    width: 10em;
+  }
+
+  .button2 {
+    align-self: center;
+    margin-top: 0;
+    width: 10em;
+    order: -1;
+  }
+}
