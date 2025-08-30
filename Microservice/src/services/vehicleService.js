@@ -1,7 +1,11 @@
-const { ethers } = require('ethers');
-const { createError } = require('../middleware/errorHandler');
-const fs = require('fs');
-const path = require('path');
+import { ethers } from 'ethers';
+import { createError } from '../middleware/errorHandler.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class VehicleService {
   constructor() {
@@ -247,4 +251,4 @@ class VehicleService {
   }
 }
 
-module.exports = new VehicleService();
+export default new VehicleService();

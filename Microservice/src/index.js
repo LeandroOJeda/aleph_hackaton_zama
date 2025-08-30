@@ -1,15 +1,17 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import dotenv from 'dotenv';
 
-const blockRoutes = require('./routes/blocks');
-const vehicleRoutes = require('./routes/vehicles');
-const { errorHandler } = require('./middleware/errorHandler');
+import blockRoutes from './routes/blocks.js';
+import vehicleRoutes from './routes/vehicles.js';
+import { errorHandler } from './middleware/errorHandler.js';
+
+dotenv.config();
 
 // Patch BigInt to be serializable
 BigInt.prototype.toJSON = function() {
@@ -100,4 +102,4 @@ app.listen(PORT, () => {
   console.log(`🔗 API disponible en http://localhost:${PORT}/api/blocks`);
 });
 
-module.exports = app;
+export default app;

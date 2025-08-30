@@ -1,7 +1,6 @@
-const express = require('express');
-const { asyncHandler } = require('../middleware/errorHandler');
-const vehicleService = require('../services/vehicleService');
-const { createError } = require('../middleware/errorHandler');
+import express from 'express';
+import { asyncHandler, createError } from '../middleware/errorHandler.js';
+import vehicleService from '../services/vehicleService.js';
 
 const router = express.Router();
 
@@ -485,4 +484,4 @@ router.get('/blocks/:blockId/exists', asyncHandler(async (req, res) => {
   });
 }));
 
-module.exports = router;
+export default router;
