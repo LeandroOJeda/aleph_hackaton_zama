@@ -27,8 +27,6 @@ let UserRoleGuard = class UserRoleGuard {
         const user = req.user;
         if (!user)
             throw new common_1.InternalServerErrorException('User not found');
-        if (user.firstTime)
-            throw new common_1.ForbiddenException('Password change required');
         for (const role of user.roles) {
             if (validRoles.includes(role.name)) {
                 return true;

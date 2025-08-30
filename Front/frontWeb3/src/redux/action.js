@@ -98,3 +98,26 @@ export const getAuto = (patente) => {
     }
   }
 }
+
+export const createEvent = (eventData) => {
+  const accessToken = localStorage.getItem("accessToken");
+  return async (dispatch) => {
+    console.log("Creando evento:", eventData);
+    
+    try {
+      const response = await axios.post("/api/v1/events", eventData, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        }
+      });
+      
+      console.log("Evento creado:", response.data);
+      return response.data;
+      
+    } catch (error) {
+      console.log("Error al crear evento:", error.message);
+      throw error;
+    }
+  }
+}
