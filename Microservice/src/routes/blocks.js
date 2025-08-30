@@ -1,8 +1,7 @@
-const express = require('express');
-const { asyncHandler } = require('../middleware/errorHandler');
-const sepoliaService = require('../services/sepoliaService');
-const { Block, BlockCollection } = require('../models/Block');
-const { createError } = require('../middleware/errorHandler');
+import express from 'express';
+import { asyncHandler, createError } from '../middleware/errorHandler.js';
+import sepoliaService from '../services/sepoliaService.js';
+import { Block, BlockCollection } from '../models/Block.js';
 
 const router = express.Router();
 
@@ -264,4 +263,4 @@ router.get('/', asyncHandler(async (req, res) => {
   });
 }));
 
-module.exports = router;
+export default router;

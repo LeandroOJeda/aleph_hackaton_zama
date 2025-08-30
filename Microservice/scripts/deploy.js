@@ -1,12 +1,16 @@
 import hre from "hardhat";
 import { ethers } from "ethers";
+import dotenv from "dotenv";
+
+// Cargar variables de entorno
+dotenv.config();
 
 async function main() {
-  console.log("Deploying VehicleInfoRegistry contract...");
+  console.log("Deploying VehicleInfoRegistry contract to Sepolia...");
 
-  // Get provider and signer
-  const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-  const signer = await provider.getSigner(0);
+  // Get provider and signer for Sepolia
+  const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
+  const signer = new ethers.Wallet(process.env.SEPOLIA_PRIVATE_KEY, provider);
   console.log("Deploying contracts with the account:", await signer.getAddress());
   console.log("Account balance:", ethers.formatEther(await provider.getBalance(await signer.getAddress())), "ETH");
 

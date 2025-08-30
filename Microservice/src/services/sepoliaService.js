@@ -1,5 +1,5 @@
-const { ethers } = require('ethers');
-const { createError } = require('../middleware/errorHandler');
+import { ethers } from 'ethers';
+import { createError } from '../middleware/errorHandler.js';
 
 class SepoliaService {
   constructor() {
@@ -193,4 +193,4 @@ class SepoliaService {
   }
 }
 
-module.exports = new SepoliaService();
+export default new SepoliaService();
