@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createEvent } from '../../redux/action';
 import styles from '../aseguradoras_form/AseguradorasForm.module.css';
+import { useNavigate } from 'react-router-dom';
 
 function SuperAdminEventForm() {
     const dispatch = useDispatch();
@@ -17,6 +18,7 @@ function SuperAdminEventForm() {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState('');
+    const navigate = useNavigate()
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -24,7 +26,7 @@ function SuperAdminEventForm() {
             ...prevState,
             [name]: value
         }));
-        
+
         if (errors[name]) {
             setErrors(prevErrors => ({
                 ...prevErrors,
@@ -62,7 +64,7 @@ function SuperAdminEventForm() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
@@ -79,7 +81,7 @@ function SuperAdminEventForm() {
 
             await dispatch(createEvent(eventData));
             setSubmitMessage('Evento de SuperAdmin creado exitosamente');
-            
+
             setFormData({
                 kilometers: '',
                 description: '',
@@ -115,10 +117,11 @@ function SuperAdminEventForm() {
     return (
         <div className={styles.bigDiv}>
             <div className={styles.divForm}>
+
                 <h1 className={styles.titulo}>Registro de Evento - Super Administrador</h1>
-                
+
                 <form className={styles.form} onSubmit={handleSubmit}>
-                    <div className={styles.divInput}>
+                    {/* <div className={styles.divInput}>
                         <select
                             name="eventType"
                             value={formData.eventType}
@@ -131,9 +134,9 @@ function SuperAdminEventForm() {
                             <option value="system_upgrade">Actualización del Sistema</option>
                         </select>
                         {errors.eventType && <span className={styles.errorLabel}>{errors.eventType}</span>}
-                    </div>
+                    </div> */}
 
-                    <div className={styles.divInput}>
+                    {/* <div className={styles.divInput}>
                         <select
                             name="priority"
                             value={formData.priority}
@@ -146,7 +149,7 @@ function SuperAdminEventForm() {
                             <option value="critical">Crítica</option>
                         </select>
                         {errors.priority && <span className={styles.errorLabel}>{errors.priority}</span>}
-                    </div>
+                    </div> */}
 
                     <div className={styles.divInput}>
                         <input
@@ -209,29 +212,36 @@ function SuperAdminEventForm() {
                     </div>
 
                     <div className={styles.divButton}>
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className={styles.button1}
                             onClick={handleReset}
                             disabled={isSubmitting}
                         >
                             Limpiar
                         </button>
-                        
-                        <button 
-                            type="submit" 
+
+                        <button
+                            type="submit"
                             className={styles.button2}
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Enviando...' : 'Crear Evento'}
                         </button>
+                        <button
+                            type="button"
+                            className={styles.button1}
+                            onClick={() => navigate(-1)}
+                        // disabled={isSubmitting}
+                        >
+                            Atras
+                        </button>
                     </div>
                 </form>
 
                 {submitMessage && (
-                    <div className={`${styles.message} ${
-                        submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
-                    }`}>
+                    <div className={`${styles.message} ${submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
+                        }`}>
                         {submitMessage}
                     </div>
                 )}

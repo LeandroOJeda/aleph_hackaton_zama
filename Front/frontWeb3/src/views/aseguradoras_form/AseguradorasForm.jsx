@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createEvent } from '../../redux/action';
 import styles from './AseguradorasForm.module.css';
+import { useNavigate } from 'react-router-dom';
 
 function AseguradorasForm() {
+    const navigate = useNavigate()
     const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         kilometers: '',
@@ -22,7 +24,7 @@ function AseguradorasForm() {
             ...prevState,
             [name]: value
         }));
-        
+
         // Limpiar error del campo cuando el usuario empiece a escribir
         if (errors[name]) {
             setErrors(prevErrors => ({
@@ -61,7 +63,7 @@ function AseguradorasForm() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
@@ -78,7 +80,7 @@ function AseguradorasForm() {
 
             await dispatch(createEvent(eventData));
             setSubmitMessage('Evento creado exitosamente');
-            
+
             // Limpiar formulario
             setFormData({
                 kilometers: '',
@@ -111,8 +113,16 @@ function AseguradorasForm() {
     return (
         <div className={styles.bigDiv}>
             <div className={styles.divForm}>
+                <button
+                    type="button"
+                    className={styles.button1}
+                    onClick={navigate(-1)}
+                // disabled={isSubmitting}
+                >
+                    Atras
+                </button>
                 <h1 className={styles.titulo}>Registro de Evento - Aseguradora</h1>
-                
+
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.divInput}>
                         <input
@@ -175,17 +185,17 @@ function AseguradorasForm() {
                     </div>
 
                     <div className={styles.divButton}>
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className={styles.button1}
                             onClick={handleReset}
                             disabled={isSubmitting}
                         >
                             Limpiar
                         </button>
-                        
-                        <button 
-                            type="submit" 
+
+                        <button
+                            type="submit"
                             className={styles.button2}
                             disabled={isSubmitting}
                         >
@@ -195,9 +205,8 @@ function AseguradorasForm() {
                 </form>
 
                 {submitMessage && (
-                    <div className={`${styles.message} ${
-                        submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
-                    }`}>
+                    <div className={`${styles.message} ${submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
+                        }`}>
                         {submitMessage}
                     </div>
                 )}

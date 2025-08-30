@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createEvent } from '../../redux/action';
 import styles from '../aseguradoras_form/AseguradorasForm.module.css';
+import { useNavigate } from 'react-router-dom';
 
 function TallerEventForm() {
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         kilometers: '',
@@ -26,7 +28,7 @@ function TallerEventForm() {
             ...prevState,
             [name]: value
         }));
-        
+
         if (errors[name]) {
             setErrors(prevErrors => ({
                 ...prevErrors,
@@ -72,7 +74,7 @@ function TallerEventForm() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
@@ -90,7 +92,7 @@ function TallerEventForm() {
 
             await dispatch(createEvent(eventData));
             setSubmitMessage('Evento de Taller registrado exitosamente');
-            
+
             setFormData({
                 kilometers: '',
                 description: '',
@@ -131,7 +133,7 @@ function TallerEventForm() {
         <div className={styles.bigDiv}>
             <div className={styles.divForm}>
                 <h1 className={styles.titulo}>Registro de Servicio - Taller</h1>
-                
+
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.divInput}>
                         <select
@@ -247,29 +249,36 @@ function TallerEventForm() {
                     </div>
 
                     <div className={styles.divButton}>
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className={styles.button1}
                             onClick={handleReset}
                             disabled={isSubmitting}
                         >
                             Limpiar
                         </button>
-                        
-                        <button 
-                            type="submit" 
+
+                        <button
+                            type="submit"
                             className={styles.button2}
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Enviando...' : 'Registrar Servicio'}
                         </button>
+                        <button
+                            type="button"
+                            className={styles.button1}
+                            onClick={() => navigate(-1)}
+                        // disabled={isSubmitting}
+                        >
+                            Atras
+                        </button>
                     </div>
                 </form>
 
                 {submitMessage && (
-                    <div className={`${styles.message} ${
-                        submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
-                    }`}>
+                    <div className={`${styles.message} ${submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
+                        }`}>
                         {submitMessage}
                     </div>
                 )}
