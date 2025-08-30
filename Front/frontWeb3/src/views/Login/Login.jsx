@@ -128,14 +128,14 @@ function Login() {
             >
               Iniciar Sesion
             </button>
-            <button
+            {/* <button
               type="button"
               className={`btn btn-primary ${style.button2}`}
               onClick={register}
               disabled={loading}
             >
               Registrarse
-            </button>
+            </button> */}
           </div>
         </form>
       </div>

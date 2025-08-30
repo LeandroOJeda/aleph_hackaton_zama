@@ -113,14 +113,7 @@ function AseguradorasForm() {
     return (
         <div className={styles.bigDiv}>
             <div className={styles.divForm}>
-                <button
-                    type="button"
-                    className={styles.button1}
-                    onClick={navigate(-1)}
-                // disabled={isSubmitting}
-                >
-                    Atras
-                </button>
+
                 <h1 className={styles.titulo}>Registro de Evento - Aseguradora</h1>
 
                 <form className={styles.form} onSubmit={handleSubmit}>
@@ -200,6 +193,14 @@ function AseguradorasForm() {
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Enviando...' : 'Crear Evento'}
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.button1}
+                            onClick={() => navigate(-1)}
+                        // disabled={isSubmitting}
+                        >
+                            Atras
                         </button>
                     </div>
                 </form>
