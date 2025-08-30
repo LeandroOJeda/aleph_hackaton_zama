@@ -1,159 +1,57 @@
-# Zama Blockchain Microservice
+# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
 
-Microservicio para interactuar con la red blockchain Zama y obtener información de bloques.
+This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
 
-## Características
+To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
 
-- 🔗 Conexión con la red Zama
-- 📦 Endpoints para obtener información de bloques
-- 🛡️ Manejo de errores robusto
-- 🚀 Rate limiting y seguridad
-- 📊 Estadísticas de bloques
-- 🔍 Búsqueda y filtrado de bloques
-- 📄 Paginación de resultados
+## Project Overview
 
-## Instalación
+This example project includes:
 
-1. Clona el repositorio
-2. Instala las dependencias:
-   ```bash
-   npm install
-   ```
-3. Configura las variables de entorno en el archivo `.env`
-4. Inicia el servidor:
-   ```bash
-   npm start
-   ```
-   O para desarrollo:
-   ```bash
-   npm run dev
-   ```
+- A simple Hardhat configuration file.
+- Foundry-compatible Solidity unit tests.
+- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
+- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
 
-## Configuración
+## Usage
 
-Crea un archivo `.env` con las siguientes variables:
+### Running Tests
 
-```env
-PORT=3000
-NODE_ENV=development
-ZAMA_RPC_URL=https://devnet.zama.ai
-ZAMA_NETWORK_ID=8009
-ZAMA_API_KEY=your_api_key_here
+To run all the tests in the project, execute the following command:
+
+```shell
+npx hardhat test
 ```
 
-## Endpoints de la API
+You can also selectively run the Solidity or `node:test` tests:
 
-### Información General
-
-- `GET /` - Información básica de la API
-- `GET /health` - Health check del servicio
-
-### Bloques
-
-- `GET /api/blocks` - Lista los últimos bloques (con paginación)
-- `GET /api/blocks/latest` - Obtiene el último bloque
-- `GET /api/blocks/:identifier` - Obtiene un bloque por número o hash
-- `GET /api/blocks/range/:start/:end` - Obtiene un rango de bloques
-- `GET /api/blocks/search` - Busca bloques con filtros
-
-### Estadísticas
-
-- `GET /api/blocks/stats/latest` - Estadísticas del último bloque
-- `GET /api/blocks/network/info` - Información de la red
-- `GET /api/blocks/network/status` - Estado de conexión
-
-## Ejemplos de Uso
-
-### Obtener el último bloque
-```bash
-curl http://localhost:3000/api/blocks/latest
+```shell
+npx hardhat test solidity
+npx hardhat test nodejs
 ```
 
-### Obtener un bloque específico
-```bash
-# Por número
-curl http://localhost:3000/api/blocks/12345
+### Make a deployment to Sepolia
 
-# Por hash
-curl http://localhost:3000/api/blocks/0x1234567890abcdef...
+This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+
+To run the deployment to a local chain:
+
+```shell
+npx hardhat ignition deploy ignition/modules/Counter.ts
 ```
 
-### Obtener rango de bloques
-```bash
-curl http://localhost:3000/api/blocks/range/100/110
+To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+
+You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
+
+To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
+
+```shell
+npx hardhat keystore set SEPOLIA_PRIVATE_KEY
 ```
 
-### Buscar bloques con filtros
-```bash
-curl "http://localhost:3000/api/blocks/search?min_transactions=5&limit=20"
+After setting the variable, you can run the deployment with the Sepolia network:
+
+```shell
+npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
 ```
-
-### Listar bloques con paginación
-```bash
-curl "http://localhost:3000/api/blocks?page=1&limit=10&detailed=true"
-```
-
-## Estructura del Proyecto
-
-```
-src/
-├── index.js              # Punto de entrada del servidor
-├── middleware/
-│   └── errorHandler.js   # Middleware de manejo de errores
-├── models/
-│   └── Block.js          # Modelos de datos para bloques
-├── routes/
-│   └── blocks.js         # Rutas de la API de bloques
-└── services/
-    └── zamaService.js    # Servicio para interactuar con Zama
-```
-
-## Respuestas de la API
-
-Todas las respuestas siguen el formato:
-
-```json
-{
-  "success": true,
-  "data": { ... },
-  "timestamp": "2024-01-01T00:00:00.000Z"
-}
-```
-
-En caso de error:
-
-```json
-{
-  "error": "Tipo de error",
-  "message": "Descripción del error",
-  "details": { ... }
-}
-```
-
-## Seguridad
-
-- Rate limiting: 100 requests por 15 minutos por IP
-- Helmet.js para headers de seguridad
-- CORS habilitado
-- Validación de parámetros de entrada
-- Manejo seguro de errores
-
-## Desarrollo
-
-### Scripts disponibles
-
-- `npm start` - Inicia el servidor en producción
-- `npm run dev` - Inicia el servidor en modo desarrollo con nodemon
-- `npm test` - Ejecuta las pruebas
-
-### Contribuir
-
-1. Fork el proyecto
-2. Crea una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
-5. Abre un Pull Request
-
-## Licencia
-
-MIT
