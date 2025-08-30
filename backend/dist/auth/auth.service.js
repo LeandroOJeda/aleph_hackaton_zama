@@ -87,9 +87,12 @@ let AuthService = class AuthService {
         try {
             const user = await this.userRepository.findOne({
                 where: { id },
-                select: { email: true, password: true, id: true, firstTime: true },
+                select: { email: true, id: true, firstTime: true },
                 relations: ['roles'],
             });
+            if (!user) {
+                throw new common_1.UnauthorizedException('User not found');
+            }
             return {
                 ...user,
                 accessToken: this.getJwtToken({ id: user.id }, '24h'),
@@ -99,6 +102,7 @@ let AuthService = class AuthService {
         catch (error) {
             if (error.name === 'TokenExpiredError')
                 throw new common_1.UnauthorizedException('Refresh token expired or invalid');
+            throw error;
         }
     }
     async changeDefaultPassword(changeDefaultPasswordDto) {

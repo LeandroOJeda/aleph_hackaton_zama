@@ -1,4 +1,5 @@
 import { Role } from './role.entity';
+import { Organization } from '../../organizations/entities/organization.entity';
 export declare class User {
     id: string;
     firstName: string;
@@ -9,6 +10,7 @@ export declare class User {
     firstTime: boolean;
     createdAt: Date;
     roles: Role[];
+    organization: Organization;
     checkFieldsBeforeInsert(): void;
     checkFieldsBeforeUpdate(): void;
 }

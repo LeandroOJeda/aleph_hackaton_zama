@@ -20,6 +20,7 @@ export declare class AuthController {
         firstTime: boolean;
         createdAt: Date;
         roles: import("./entities/role.entity").Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     loginUser(loginUserDto: LoginUserDto): Promise<{
         accessToken: string;
@@ -33,6 +34,7 @@ export declare class AuthController {
         firstTime: boolean;
         createdAt: Date;
         roles: import("./entities/role.entity").Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     refreshToken(user: User): Promise<{
         accessToken: string;
@@ -46,6 +48,7 @@ export declare class AuthController {
         firstTime: boolean;
         createdAt: Date;
         roles: import("./entities/role.entity").Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     changeDefaultPassword(changeDefaultPasswordDto: ChangeDefaultPasswordDto): Promise<{
         accessToken: string;
@@ -59,6 +62,7 @@ export declare class AuthController {
         firstTime: boolean;
         createdAt: Date;
         roles: import("./entities/role.entity").Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     getMe(user: User): void;
 }
