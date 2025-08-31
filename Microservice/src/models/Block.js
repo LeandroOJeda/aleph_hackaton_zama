@@ -196,7 +196,4 @@ class BlockCollection {
   }
 }
 
-module.exports = {
-  Block,
-  BlockCollection
-};
+export { Block, BlockCollection };
