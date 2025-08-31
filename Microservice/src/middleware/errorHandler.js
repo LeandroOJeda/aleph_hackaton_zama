@@ -76,8 +76,4 @@ const createError = (message, statusCode = 500, details = null) => {
   return error;
 };
 
-module.exports = {
-  errorHandler,
-  asyncHandler,
-  createError
-};
+export { errorHandler, asyncHandler, createError };

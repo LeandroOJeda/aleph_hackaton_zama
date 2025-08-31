@@ -8,61 +8,9 @@ export declare class AuthController {
     private readonly authService;
     private readonly jwtService;
     constructor(authService: AuthService, jwtService: JwtService);
-    createUser(createUserDto: CreateUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        password: string;
-        isActive: boolean;
-        firstTime: boolean;
-        createdAt: Date;
-        roles: import("./entities/role.entity").Role[];
-        organization: import("../organizations/entities/organization.entity").Organization;
-    }>;
-    loginUser(loginUserDto: LoginUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        password: string;
-        isActive: boolean;
-        firstTime: boolean;
-        createdAt: Date;
-        roles: import("./entities/role.entity").Role[];
-        organization: import("../organizations/entities/organization.entity").Organization;
-    }>;
-    refreshToken(user: User): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        password: string;
-        isActive: boolean;
-        firstTime: boolean;
-        createdAt: Date;
-        roles: import("./entities/role.entity").Role[];
-        organization: import("../organizations/entities/organization.entity").Organization;
-    }>;
-    changeDefaultPassword(changeDefaultPasswordDto: ChangeDefaultPasswordDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        password: string;
-        isActive: boolean;
-        firstTime: boolean;
-        createdAt: Date;
-        roles: import("./entities/role.entity").Role[];
-        organization: import("../organizations/entities/organization.entity").Organization;
-    }>;
+    createUser(createUserDto: CreateUserDto): unknown;
+    loginUser(loginUserDto: LoginUserDto): unknown;
+    refreshToken(user: User): unknown;
+    changeDefaultPassword(changeDefaultPasswordDto: ChangeDefaultPasswordDto): unknown;
     getMe(user: User): void;
 }

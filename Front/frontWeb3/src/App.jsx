@@ -11,6 +11,8 @@ import SuperAdminEventForm from './views/eventos/SuperAdminEventForm';
 import AdminEventForm from './views/eventos/AdminEventForm';
 import TallerEventForm from './views/eventos/TallerEventForm';
 import ConcesionariaEventForm from './views/eventos/ConcesionariaEventForm';
+import SimulacionPago from './views/simulacionPago/SimulacionPago';
+import HistorialVehiculo from './views/historialVehiculo/HistorialVehiculo';
 import NavBar from './components/NavBar/NavBar';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
@@ -84,6 +86,17 @@ function AppContent() {
               <AseguradorasForm />
             </ProtectedRoute>
           } 
+        />
+
+        {/* Rutas para flujo de historial vehicular */}
+        <Route 
+          path="/simulacion-pago" 
+          element={<SimulacionPago />} 
+        />
+        
+        <Route 
+          path="/historial-vehiculo" 
+          element={<HistorialVehiculo />} 
         />
       </Routes>
     </>

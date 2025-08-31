@@ -30,6 +30,12 @@ export class Event {
   @Column('bool', { default: true })
   isActive: boolean;
 
+  @Column('varchar', { nullable: true })
+  blockchainBlockId: string;
+
+  @Column('varchar', { nullable: true })
+  blockchainTxHash: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
