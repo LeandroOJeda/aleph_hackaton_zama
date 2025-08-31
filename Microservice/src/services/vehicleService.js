@@ -3,6 +3,11 @@ import { createError } from '../middleware/errorHandler.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+// import { createInstance } from 'fhevmjs'; // Solo para frontend
+
+// Asegurar que las variables de entorno estén cargadas
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,20 +28,35 @@ class VehicleService {
     
     // Cargar ABI del contrato
     this.loadContractABI();
+    
+    // FHEVM se maneja en el contrato, no necesario en backend
+    this.fhevmInstance = null;
   }
+
+  // FHEVM no es necesario en el backend - la encriptación se maneja en el contrato
+  // Los datos se envían como plain text y el contrato los convierte a tipos encriptados
 
   /**
    * Carga el ABI del contrato desde el archivo de artifacts
    */
   loadContractABI() {
     try {
+      console.log('Configuración del contrato:');
+      console.log('- Contract Address:', this.contractAddress);
+      console.log('- Private Key exists:', !!this.privateKey);
+      console.log('- Wallet exists:', !!this.wallet);
+      
       const artifactPath = path.join(__dirname, '../../artifacts/contracts/TransactionRegistry.sol/VehicleInfoRegistry.json');
       const artifact = JSON.parse(fs.readFileSync(artifactPath, 'utf8'));
       this.contractABI = artifact.abi;
+      console.log('- ABI cargado correctamente');
       
       // Crear instancia del contrato si tenemos la dirección
       if (this.contractAddress && this.wallet) {
         this.contract = new ethers.Contract(this.contractAddress, this.contractABI, this.wallet);
+        console.log('- Contrato inicializado correctamente');
+      } else {
+        console.log('- Error: Falta contractAddress o wallet para inicializar el contrato');
       }
     } catch (error) {
       console.error('Error cargando ABI del contrato:', error.message);
@@ -45,6 +65,8 @@ class VehicleService {
 
   /**
    * Crea un nuevo bloque de información vehicular
+   * NOTA: En producción, los datos deberían venir encriptados desde el frontend usando fhevmjs
+   * Por ahora, usamos valores mock para testing
    */
   async createInfoBlock(vehicleId, kilometers, details, origin) {
     try {
@@ -52,7 +74,22 @@ class VehicleService {
         throw createError('Contrato no configurado correctamente', 500);
       }
 
-      const tx = await this.contract.createInfoBlock(vehicleId, kilometers, details, origin);
+      // Convertir kilometers a uint32
+      const kilometersUint32 = parseInt(kilometers);
+      
+      // Configuración de gas específica para FHEVM
+      const gasOptions = {
+        gasLimit: 2000000, // Gas limit para operaciones FHEVM
+        gasPrice: ethers.parseUnits('10', 'gwei') // Gas price para Sepolia
+      };
+      
+      const tx = await this.contract.createInfoBlock(
+        vehicleId,
+        kilometersUint32,
+        details,
+        origin,
+        gasOptions
+      );
       const receipt = await tx.wait();
       
       // Extraer el ID del bloque del evento

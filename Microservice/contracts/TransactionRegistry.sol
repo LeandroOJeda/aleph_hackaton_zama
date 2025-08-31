@@ -1,203 +1,299 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-contract VehicleInfoRegistry {
+import { FHE, euint32, ebool, externalEuint32, externalEbool } from "@fhevm/solidity/lib/FHE.sol";
+import { SepoliaConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
+
+contract VehicleInfoRegistry is SepoliaConfig {
     // Estructura genérica para bloques de información vehicular
     struct InfoBlock {
-        uint32 id;
+        euint32 id;
         string vehicleId; // Identificador del vehículo
-        uint32 kilometros; // Kilómetros al momento del registro
+        euint32 kilometros; // Kilómetros al momento del registro
         string detalles; // Campo de texto libre para detalles
         string origen; // Usuario/entidad que creó el bloque
         address createdBy; // Dirección que creó el registro
-        uint256 timestamp; // Momento de creación
+        euint32 timestamp; // Momento de creación (usar euint32 en lugar de euint64)
     }
     
     // Información adicional por vehículo
     struct VehicleInfo {
-        bool activo; // Estado activo/inactivo
-        bool poseeVTV; // Posee Verificación Técnica Vehicular
-        uint32 ultimoKilometraje; // Último kilometraje registrado
-        bool existe; // Para verificar si el vehículo está registrado
+        ebool activo; // Estado activo/inactivo
+        ebool poseeVTV; // Posee Verificación Técnica Vehicular
+        euint32 ultimoKilometraje; // Último kilometraje registrado
+        ebool existe; // Para verificar si el vehículo está registrado
     }
 
-    mapping(uint32 => InfoBlock) private infoBlocks;
-    mapping(string => uint32[]) private vehicleBlocks; // vehicleId => block IDs
-    mapping(address => uint32[]) private userBlocks;
+    mapping(euint32 => InfoBlock) private infoBlocks;
+    mapping(string => euint32[]) private vehicleBlocks; // vehicleId => block IDs
+    mapping(address => euint32[]) private userBlocks;
     mapping(string => VehicleInfo) private vehicles; // vehicleId => vehicle info
-    uint32 private nextId = 1;
+    euint32 private nextId;
 
     event InfoBlockCreated(
-        uint32 indexed id,
+        euint32 indexed id,
         string indexed vehicleId,
-        uint32 kilometros,
-        string detalles,
-        string origen,
         address indexed createdBy
     );
 
     event VehicleStatusUpdated(
         string indexed vehicleId,
-        bool activo,
-        bool poseeVTV,
         address indexed updatedBy
     );
 
     event KilometrajeUpdated(
         string indexed vehicleId,
-        uint32 previousKm,
-        uint32 newKm,
         address indexed updatedBy
     );
 
-    function getBlockCount() public view returns (uint32) {
-        return nextId - 1;
+    constructor() {
+        nextId = FHE.asEuint32(1);
+    }
+
+    function getBlockCount() public view returns (euint32) {
+        return nextId;
     }
 
     function createInfoBlock(
         string memory _vehicleId,
-        uint32 _kilometros,
+        externalEuint32 encryptedKilometros,
+        bytes calldata inputProof,
         string memory _detalles,
         string memory _origen
-    ) public returns (uint32) {
+    ) public returns (euint32) {
         require(bytes(_vehicleId).length > 0, "El ID del vehiculo no puede estar vacio");
         require(bytes(_detalles).length > 0, "Los detalles no pueden estar vacios");
         require(bytes(_origen).length > 0, "El origen no puede estar vacio");
-        require(_kilometros > 0, "Los kilometros deben ser mayor a 0");
         
-        // Validar kilometraje no sea menor al actual (excepto para registros iniciales)
-        if (vehicles[_vehicleId].existe && vehicles[_vehicleId].ultimoKilometraje > 0) {
-            require(_kilometros >= vehicles[_vehicleId].ultimoKilometraje, "El kilometraje no puede ser menor al actual");
-        }
+        // Convertir el input encriptado a euint32 según la documentación oficial
+        euint32 kilometros = FHE.fromExternal(encryptedKilometros, inputProof);
+        
+        // En FHEVM v0.4+, no podemos usar decrypt en require statements
+        // Las validaciones se hacen completamente encriptadas
 
-        uint32 blockId = nextId;
-        nextId++;
+        euint32 blockId = nextId;
+        nextId = FHE.add(nextId, FHE.asEuint32(1));
 
+        // Usar timestamp relativo para evitar overflow de uint32
+        // Restar una fecha base (1 enero 2024) para reducir el valor
+        uint256 baseTimestamp = 1704067200; // 1 enero 2024 en Unix timestamp
+        uint32 relativeTimestamp = uint32(block.timestamp - baseTimestamp);
+        
         infoBlocks[blockId] = InfoBlock({
             id: blockId,
             vehicleId: _vehicleId,
-            kilometros: _kilometros,
+            kilometros: kilometros,
             detalles: _detalles,
             origen: _origen,
             createdBy: msg.sender,
-            timestamp: block.timestamp
+            timestamp: FHE.asEuint32(relativeTimestamp)
         });
 
         vehicleBlocks[_vehicleId].push(blockId);
         userBlocks[msg.sender].push(blockId);
 
         // Actualizar información del vehículo
-        if (!vehicles[_vehicleId].existe) {
-            vehicles[_vehicleId] = VehicleInfo({
-                activo: true,
-                poseeVTV: false,
-                ultimoKilometraje: _kilometros,
-                existe: true
-            });
-        } else {
-            vehicles[_vehicleId].ultimoKilometraje = _kilometros;
-        }
+        VehicleInfo storage vehicleInfo = vehicles[_vehicleId];
+        
+        // En FHEVM v0.4+, usamos operaciones completamente encriptadas
+        // Si el vehículo no existe, lo creamos. Si existe, actualizamos el kilometraje
+        ebool vehicleExists = vehicleInfo.existe;
+        
+        // Crear o actualizar vehículo usando operaciones FHE
+        vehicleInfo.activo = FHE.select(vehicleExists, vehicleInfo.activo, FHE.asEbool(true));
+        vehicleInfo.poseeVTV = FHE.select(vehicleExists, vehicleInfo.poseeVTV, FHE.asEbool(false));
+        vehicleInfo.ultimoKilometraje = FHE.select(
+            vehicleExists, 
+            FHE.select(FHE.gt(kilometros, vehicleInfo.ultimoKilometraje), kilometros, vehicleInfo.ultimoKilometraje),
+            kilometros
+        );
+        vehicleInfo.existe = FHE.asEbool(true);
+
+        // Otorgar permisos FHE según documentación oficial
+        FHE.allowThis(blockId);
+        FHE.allow(blockId, msg.sender);
 
         emit InfoBlockCreated(
             blockId,
             _vehicleId,
-            _kilometros,
-            _detalles,
-            _origen,
             msg.sender
         );
 
         return blockId;
     }
 
-    function getInfoBlock(uint32 _id) public view returns (
-        uint32 id,
+    function getInfoBlock(euint32 _id) public view returns (
         string memory vehicleId,
-        uint32 kilometros,
         string memory detalles,
         string memory origen,
-        address createdBy,
-        uint256 timestamp
+        address createdBy
     ) {
-        require(blockExists(_id), "El bloque de informacion no existe");
-        
-        InfoBlock memory infoBlockData = infoBlocks[_id];
+        InfoBlock memory infoBlock = infoBlocks[_id];
         return (
-            infoBlockData.id,
-            infoBlockData.vehicleId,
-            infoBlockData.kilometros,
-            infoBlockData.detalles,
-            infoBlockData.origen,
-            infoBlockData.createdBy,
-            infoBlockData.timestamp
+            infoBlock.vehicleId,
+            infoBlock.detalles,
+            infoBlock.origen,
+            infoBlock.createdBy
         );
+    }
+    
+    // NOTA: En producción, esta función requeriría decryption asíncrono
+    function getDecryptedInfoBlock(euint32 _id) public view returns (
+        string memory message
+    ) {
+        InfoBlock memory infoBlock = infoBlocks[_id];
+        require(infoBlock.createdBy == msg.sender, "Solo el creador puede desencriptar");
+        
+        return "Usar decryption asincrono para obtener valores encriptados";
+        
+        // En una implementación real con async decrypt:
+        // return (
+        //     FHE.decrypt(infoBlock.id),        // Requiere async decrypt
+        //     infoBlock.vehicleId,              // Plain text
+        //     FHE.decrypt(infoBlock.kilometros), // Requiere async decrypt
+        //     infoBlock.detalles,               // Plain text
+        //     infoBlock.origen,                 // Plain text
+        //     infoBlock.createdBy,              // Plain text
+        //     FHE.decrypt(infoBlock.timestamp)  // Requiere async decrypt
+        // );
     }
 
     function updateInfoBlock(
-        uint32 _id,
+        euint32 _id,
         string memory _detalles,
         string memory _origen
     ) public {
-        require(blockExists(_id), "El bloque de informacion no existe");
-        require(infoBlocks[_id].createdBy == msg.sender, "Solo el creador puede actualizar el bloque");
+        InfoBlock storage infoBlock = infoBlocks[_id];
+        require(infoBlock.createdBy == msg.sender, "Solo el creador puede actualizar el bloque");
         require(bytes(_detalles).length > 0, "Los detalles no pueden estar vacios");
         require(bytes(_origen).length > 0, "El origen no puede estar vacio");
 
-        infoBlocks[_id].detalles = _detalles;
-        infoBlocks[_id].origen = _origen;
+        infoBlock.detalles = _detalles;
+        infoBlock.origen = _origen;
 
         emit InfoBlockCreated(
             _id,
-            infoBlocks[_id].vehicleId,
-            infoBlocks[_id].kilometros,
-            _detalles,
-            _origen,
+            infoBlock.vehicleId,
             msg.sender
         );
     }
 
-    function getBlocksByCreator(address _creator) public view returns (uint32[] memory) {
+    function getBlocksByCreator(address _creator) public view returns (euint32[] memory) {
         return userBlocks[_creator];
     }
 
-    function blockExists(uint32 _id) public view returns (bool) {
-        return _id > 0 && _id < nextId;
+    function blockExists(euint32 _id) public view returns (bool) {
+        return infoBlocks[_id].createdBy != address(0);
     }
 
     // Funciones específicas para vehículos
-    function getVehicleBlocks(string memory _vehicleId) public view returns (uint32[] memory) {
+    function getVehicleBlocks(string memory _vehicleId) public view returns (euint32[] memory) {
         return vehicleBlocks[_vehicleId];
     }
 
+    // Función para verificar si un vehículo existe (sin revelar información encriptada)
     function getVehicleInfo(string memory _vehicleId) public view returns (
-        bool activo,
-        bool poseeVTV,
-        uint32 ultimoKilometraje,
-        bool existe
+        bool exists // Solo información no encriptada
     ) {
-        VehicleInfo memory info = vehicles[_vehicleId];
-        return (info.activo, info.poseeVTV, info.ultimoKilometraje, info.existe);
+        // Verificamos la longitud del array de bloques como proxy de existencia
+        return vehicleBlocks[_vehicleId].length > 0;
+    }
+    
+    // NOTA: Esta función usaría decryption asíncrono en producción
+    // Para simplicidad del ejemplo, mantenemos la estructura pero comentamos decrypt
+    function getDecryptedVehicleInfo(string memory _vehicleId) public view returns (
+        string memory message
+    ) {
+        // Verificar que el usuario tenga al menos un bloque del vehículo
+        require(vehicleBlocks[_vehicleId].length > 0, "Vehiculo no encontrado");
+        bool hasAccess = false;
+        euint32[] memory blocks = vehicleBlocks[_vehicleId];
+        for (uint i = 0; i < blocks.length; i++) {
+            if (infoBlocks[blocks[i]].createdBy == msg.sender) {
+                hasAccess = true;
+                break;
+            }
+        }
+        require(hasAccess, "No autorizado para ver esta informacion");
+        
+        // En una implementación real, esto requeriría decryption asíncrono
+        return "Usar decryption asincrono para obtener valores encriptados";
+        
+        // VehicleInfo memory vehicleInfo = vehicles[_vehicleId];
+        // return (
+        //     FHE.decrypt(vehicleInfo.activo),      // Requiere async decrypt
+        //     FHE.decrypt(vehicleInfo.poseeVTV),    // Requiere async decrypt  
+        //     FHE.decrypt(vehicleInfo.ultimoKilometraje), // Requiere async decrypt
+        //     true // exists
+        // );
     }
 
     function updateVehicleStatus(
         string memory _vehicleId,
-        bool _activo,
-        bool _poseeVTV
+        bytes32 encryptedActivo,
+        bytes memory inputProofActivo,
+        bytes32 encryptedPoseeVTV,
+        bytes memory inputProofPoseeVTV
     ) public {
-        require(vehicles[_vehicleId].existe, "El vehiculo no existe");
+        // Verificar que el vehículo existe usando información no encriptada
+        require(vehicleBlocks[_vehicleId].length > 0, "El vehiculo no esta registrado");
         
-        vehicles[_vehicleId].activo = _activo;
-        vehicles[_vehicleId].poseeVTV = _poseeVTV;
-
-        emit VehicleStatusUpdated(_vehicleId, _activo, _poseeVTV, msg.sender);
+        // Verificar que el usuario tenga al menos un bloque del vehículo
+        bool hasAccess = false;
+        euint32[] memory blocks = vehicleBlocks[_vehicleId];
+        for (uint i = 0; i < blocks.length; i++) {
+            if (infoBlocks[blocks[i]].createdBy == msg.sender) {
+                hasAccess = true;
+                break;
+            }
+        }
+        require(hasAccess, "No tienes permisos para actualizar este vehiculo");
+        
+        VehicleInfo storage vehicleInfo = vehicles[_vehicleId];
+        vehicleInfo.activo = FHE.fromExternal(externalEbool.wrap(encryptedActivo), inputProofActivo);
+        vehicleInfo.poseeVTV = FHE.fromExternal(externalEbool.wrap(encryptedPoseeVTV), inputProofPoseeVTV);
+        
+        emit VehicleStatusUpdated(_vehicleId, msg.sender);
     }
 
     function isVehicleRegistered(string memory _vehicleId) public view returns (bool) {
-        return vehicles[_vehicleId].existe;
+        return vehicleBlocks[_vehicleId].length > 0;
     }
 
-    function getCurrentKilometraje(string memory _vehicleId) public view returns (uint32) {
-        require(vehicles[_vehicleId].existe, "El vehiculo no existe");
-        return vehicles[_vehicleId].ultimoKilometraje;
+    // NOTA: Esta función requeriría decryption asíncrono para obtener el valor real
+    function getCurrentKilometraje(string memory _vehicleId) public view returns (string memory) {
+        require(vehicleBlocks[_vehicleId].length > 0, "El vehiculo no esta registrado");
+        
+        // Verificar que el usuario tenga acceso
+        bool hasAccess = false;
+        euint32[] memory blocks = vehicleBlocks[_vehicleId];
+        for (uint i = 0; i < blocks.length; i++) {
+            if (infoBlocks[blocks[i]].createdBy == msg.sender) {
+                hasAccess = true;
+                break;
+            }
+        }
+        require(hasAccess, "No autorizado para ver esta informacion");
+        
+        return "Usar decryption asincrono para obtener kilometraje";
+        // return FHE.decrypt(vehicles[_vehicleId].ultimoKilometraje); // Requiere async decrypt
+    }
+
+    // Función adicional para obtener el total de vehículos registrados
+    function getTotalVehicles() public view returns (uint32) {
+        // Esta función requeriría un contador adicional para ser eficiente
+        // Por ahora retorna 0 como placeholder
+        return 0;
+    }
+
+    // Función para verificar si un usuario tiene acceso a un vehículo
+    function hasVehicleAccess(string memory _vehicleId, address _user) public view returns (bool) {
+        euint32[] memory blocks = vehicleBlocks[_vehicleId];
+        for (uint i = 0; i < blocks.length; i++) {
+            if (infoBlocks[blocks[i]].createdBy == _user) {
+                return true;
+            }
+        }
+        return false;
     }
 }
