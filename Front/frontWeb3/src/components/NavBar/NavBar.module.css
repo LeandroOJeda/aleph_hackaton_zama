@@ -1,6 +1,6 @@
 .navbar {
-  background: #1f2937;
-  border-bottom: 1px solid #374151;
+  background: var(--vc-bg-dark);
+  border-bottom: 1px solid var(--vc-gray-600);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -25,7 +25,7 @@
 .brandButton {
   background: none;
   border: none;
-  color: #f9fafb;
+  color: var(--vc-gray-50);
   font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
@@ -38,7 +38,7 @@
 }
 
 .brandButton:hover {
-  color: #60a5fa;
+  color: var(--vc-primary-400);
 }
 
 .navbarCenter {
@@ -50,14 +50,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #374151;
+  background: var(--vc-gray-700);
   padding: 0.5rem 1rem;
   border-radius: 6px;
-  border: 1px solid #4b5563;
+  border: 1px solid var(--vc-gray-600);
 }
 
 .roleLabel {
-  color: #9ca3af;
+  color: var(--vc-gray-400);
   font-weight: 500;
   font-size: 0.875rem;
 }
@@ -73,32 +73,32 @@
 
 /* Colores específicos por rol */
 .superadmin {
-  background: #dc2626;
+  background: var(--vc-role-superadmin);
   color: white;
 }
 
 .admin {
-  background: #7c3aed;
+  background: var(--vc-role-admin);
   color: white;
 }
 
 .aseguradora {
-  background: #059669;
+  background: var(--vc-role-aseguradora);
   color: white;
 }
 
 .taller {
-  background: #d97706;
+  background: var(--vc-role-taller);
   color: white;
 }
 
 .concesionaria {
-  background: #2563eb;
+  background: var(--vc-role-concesionaria);
   color: white;
 }
 
 .consumer {
-  background: #6b7280;
+  background: var(--vc-role-consumer);
   color: white;
 }
 
@@ -126,26 +126,26 @@
 }
 
 .createEventButton {
-  background: #2563eb;
+  background: var(--vc-primary-500);
   color: white;
-  border-color: #2563eb;
+  border-color: var(--vc-primary-500);
 }
 
 .createEventButton:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: var(--vc-primary-600);
+  border-color: var(--vc-primary-600);
 }
 
 .logoutButton {
   background: transparent;
-  color: #d1d5db;
-  border-color: #4b5563;
+  color: var(--vc-gray-300);
+  border-color: var(--vc-gray-600);
 }
 
 .logoutButton:hover {
-  background: #374151;
-  color: #f3f4f6;
-  border-color: #6b7280;
+  background: var(--vc-gray-700);
+  color: var(--vc-gray-100);
+  border-color: var(--vc-gray-500);
 }
 
 .buttonIcon {

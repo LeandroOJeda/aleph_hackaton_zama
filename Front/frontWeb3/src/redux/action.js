@@ -78,25 +78,39 @@ export const logIn = (user, navigate, Swal) => {
 export const getAuto = (patente) => {
   const accessToken = localStorage.getItem("accessToken");
   return async (dispatch) => {
-    console.log("llega al action");
+    console.log("Buscando vehículo:", patente);
   
     try {
       const response = await axios.get(`/api/v1/vehicles/${patente}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       })
       
-      console.log("Response data:", response.data);
+      console.log("Respuesta del servidor:", response.status, response.data);
       
       if (response && response.data) {
         dispatch({type:"DATA_AUTO", payload: response.data})
         return response.data;
+      } else {
+        console.log("No se recibieron datos del servidor");
+        dispatch({type:"DATA_AUTO", payload: null});
+        throw new Error("No se recibieron datos del servidor");
       }
       
     } catch (error) {
-      console.log("Error en getAuto:", error.message);
+      console.error("Error en getAuto:", {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      
       dispatch({type:"DATA_AUTO", payload: null});
+      throw error; // Re-lanzar el error para que el componente lo maneje
     }
   }
 }

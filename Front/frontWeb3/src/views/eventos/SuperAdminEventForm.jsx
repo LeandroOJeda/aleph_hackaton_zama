@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { createEvent } from '../../redux/action';
-import styles from '../aseguradoras_form/AseguradorasForm.module.css';
+import styles from './EventForm.module.css';
 
 function SuperAdminEventForm() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         kilometers: '',
         description: '',
         eventDate: '',
         location: '',
         vehicleId: '',
-        eventType: 'system_maintenance', // Campo específico para SuperAdmin
+        eventType: 'system_maintenance',
         priority: 'high'
     });
     const [errors, setErrors] = useState({});
@@ -78,8 +80,9 @@ function SuperAdminEventForm() {
             };
 
             await dispatch(createEvent(eventData));
-            setSubmitMessage('Evento de SuperAdmin creado exitosamente');
+            setSubmitMessage('Evento creado exitosamente');
             
+            // Reset form
             setFormData({
                 kilometers: '',
                 description: '',
@@ -98,143 +101,164 @@ function SuperAdminEventForm() {
         }
     };
 
-    const handleReset = () => {
-        setFormData({
-            kilometers: '',
-            description: '',
-            eventDate: '',
-            location: '',
-            vehicleId: '',
-            eventType: 'system_maintenance',
-            priority: 'high'
-        });
-        setErrors({});
-        setSubmitMessage('');
+    const handleBack = () => {
+        navigate('/form');
     };
 
     return (
-        <div className={styles.bigDiv}>
-            <div className={styles.divForm}>
-                <h1 className={styles.titulo}>Registro de Evento - Super Administrador</h1>
-                
-                <form className={styles.form} onSubmit={handleSubmit}>
-                    <div className={styles.divInput}>
-                        <select
-                            name="eventType"
-                            value={formData.eventType}
-                            onChange={handleChange}
-                            className={errors.eventType ? styles.inputError : ''}
-                        >
-                            <option value="system_maintenance">Mantenimiento del Sistema</option>
-                            <option value="security_audit">Auditoría de Seguridad</option>
-                            <option value="data_migration">Migración de Datos</option>
-                            <option value="system_upgrade">Actualización del Sistema</option>
-                        </select>
-                        {errors.eventType && <span className={styles.errorLabel}>{errors.eventType}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <select
-                            name="priority"
-                            value={formData.priority}
-                            onChange={handleChange}
-                            className={errors.priority ? styles.inputError : ''}
-                        >
-                            <option value="low">Prioridad Baja</option>
-                            <option value="medium">Prioridad Media</option>
-                            <option value="high">Prioridad Alta</option>
-                            <option value="critical">Crítica</option>
-                        </select>
-                        {errors.priority && <span className={styles.errorLabel}>{errors.priority}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="number"
-                            name="kilometers"
-                            placeholder="Kilómetros"
-                            value={formData.kilometers}
-                            onChange={handleChange}
-                            className={errors.kilometers ? styles.inputError : ''}
-                            min="0"
-                        />
-                        {errors.kilometers && <span className={styles.errorLabel}>{errors.kilometers}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <textarea
-                            name="description"
-                            placeholder="Descripción del evento (incluya detalles técnicos)"
-                            value={formData.description}
-                            onChange={handleChange}
-                            className={`${styles.textarea} ${errors.description ? styles.inputError : ''}`}
-                            rows="4"
-                        />
-                        {errors.description && <span className={styles.errorLabel}>{errors.description}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="datetime-local"
-                            name="eventDate"
-                            value={formData.eventDate}
-                            onChange={handleChange}
-                            className={errors.eventDate ? styles.inputError : ''}
-                        />
-                        {errors.eventDate && <span className={styles.errorLabel}>{errors.eventDate}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="text"
-                            name="location"
-                            placeholder="Ubicación del evento"
-                            value={formData.location}
-                            onChange={handleChange}
-                            className={errors.location ? styles.inputError : ''}
-                        />
-                        {errors.location && <span className={styles.errorLabel}>{errors.location}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="text"
-                            name="vehicleId"
-                            placeholder="ID del Vehículo"
-                            value={formData.vehicleId}
-                            onChange={handleChange}
-                            className={errors.vehicleId ? styles.inputError : ''}
-                        />
-                        {errors.vehicleId && <span className={styles.errorLabel}>{errors.vehicleId}</span>}
-                    </div>
-
-                    <div className={styles.divButton}>
-                        <button 
-                            type="button" 
-                            className={styles.button1}
-                            onClick={handleReset}
-                            disabled={isSubmitting}
-                        >
-                            Limpiar
-                        </button>
-                        
-                        <button 
-                            type="submit" 
-                            className={styles.button2}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Enviando...' : 'Crear Evento'}
-                        </button>
-                    </div>
-                </form>
-
-                {submitMessage && (
-                    <div className={`${styles.message} ${
-                        submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
-                    }`}>
-                        {submitMessage}
+        <div className={styles.container}>
+            <div className={styles.card}>
+                {isSubmitting && (
+                    <div className={styles.loadingOverlay}>
+                        <div className={styles.spinner}></div>
                     </div>
                 )}
+                
+                <div className={styles.header}>
+                    <h1 className={styles.title}>Registro de Evento</h1>
+                    <p className={styles.subtitle}>Super Administrador - Gestión del Sistema</p>
+                </div>
+                
+                <div className={styles.content}>
+                    <form className={styles.form} onSubmit={handleSubmit}>
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="eventType" className={styles.label}>Tipo de Evento</label>
+                            <select
+                                id="eventType"
+                                name="eventType"
+                                value={formData.eventType}
+                                onChange={handleChange}
+                                className={`${styles.select} ${errors.eventType ? styles.inputError : ''}`}
+                            >
+                                <option value="system_maintenance">Mantenimiento del Sistema</option>
+                                <option value="security_audit">Auditoría de Seguridad</option>
+                                <option value="data_migration">Migración de Datos</option>
+                                <option value="system_upgrade">Actualización del Sistema</option>
+                            </select>
+                            {errors.eventType && <div className={styles.errorMessage}>{errors.eventType}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="priority" className={styles.label}>Prioridad</label>
+                            <select
+                                id="priority"
+                                name="priority"
+                                value={formData.priority}
+                                onChange={handleChange}
+                                className={`${styles.select} ${errors.priority ? styles.inputError : ''}`}
+                            >
+                                <option value="low">Prioridad Baja</option>
+                                <option value="medium">Prioridad Media</option>
+                                <option value="high">Prioridad Alta</option>
+                                <option value="critical">Crítica</option>
+                            </select>
+                            {errors.priority && <div className={styles.errorMessage}>{errors.priority}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="kilometers" className={styles.label}>Kilómetros</label>
+                            <input
+                                id="kilometers"
+                                type="number"
+                                name="kilometers"
+                                placeholder="Ingrese los kilómetros del vehículo"
+                                value={formData.kilometers}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.kilometers ? styles.inputError : ''}`}
+                                min="0"
+                            />
+                            {errors.kilometers && <div className={styles.errorMessage}>{errors.kilometers}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="description" className={styles.label}>Descripción</label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                placeholder="Describe el evento o mantenimiento realizado (incluye detalles técnicos)"
+                                value={formData.description}
+                                onChange={handleChange}
+                                className={`${styles.textarea} ${errors.description ? styles.inputError : ''}`}
+                                rows="4"
+                            />
+                            {errors.description && <div className={styles.errorMessage}>{errors.description}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="eventDate" className={styles.label}>Fecha y Hora</label>
+                            <input
+                                id="eventDate"
+                                type="datetime-local"
+                                name="eventDate"
+                                value={formData.eventDate}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.eventDate ? styles.inputError : ''}`}
+                            />
+                            {errors.eventDate && <div className={styles.errorMessage}>{errors.eventDate}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="location" className={styles.label}>Ubicación</label>
+                            <input
+                                id="location"
+                                type="text"
+                                name="location"
+                                placeholder="Ubicación del evento o servidor"
+                                value={formData.location}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.location ? styles.inputError : ''}`}
+                            />
+                            {errors.location && <div className={styles.errorMessage}>{errors.location}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="vehicleId" className={styles.label}>ID del Vehículo</label>
+                            <input
+                                id="vehicleId"
+                                type="text"
+                                name="vehicleId"
+                                placeholder="Identificador único del vehículo"
+                                value={formData.vehicleId}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.vehicleId ? styles.inputError : ''}`}
+                            />
+                            {errors.vehicleId && <div className={styles.errorMessage}>{errors.vehicleId}</div>}
+                        </div>
+
+                        <div className={styles.buttonGroup}>
+                            <button 
+                                type="button" 
+                                className={styles.backButton}
+                                onClick={handleBack}
+                                disabled={isSubmitting}
+                            >
+                                <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                Volver
+                            </button>
+                            
+                            <button 
+                                type="submit" 
+                                className={styles.submitButton}
+                                disabled={isSubmitting}
+                            >
+                                <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                {isSubmitting ? 'Creando...' : 'Crear Evento'}
+                            </button>
+                        </div>
+                    </form>
+
+                    {submitMessage && (
+                        <div className={`${styles.messageContainer} ${
+                            submitMessage.includes('Error') ? styles.errorMessageContainer : styles.successMessage
+                        }`}>
+                            {submitMessage}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

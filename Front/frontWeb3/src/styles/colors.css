@@ -1,0 +1,116 @@
+/* VehicleChain Brand Colors */
+:root {
+  /* Colores Primarios de la Marca */
+  --vc-primary: #2563eb;      /* Azul Corporativo - Confianza y Seguridad */
+  --vc-secondary: #059669;    /* Verde Tecnológico - Blockchain y Innovación */  
+  --vc-accent: #dc2626;       /* Rojo Alerta - Seguridad y Urgencia */
+
+  /* Variaciones de Primario (Azul) */
+  --vc-primary-50: #eff6ff;
+  --vc-primary-100: #dbeafe;
+  --vc-primary-200: #bfdbfe;
+  --vc-primary-300: #93c5fd;
+  --vc-primary-400: #60a5fa;
+  --vc-primary-500: #2563eb;   /* Color base */
+  --vc-primary-600: #1d4ed8;
+  --vc-primary-700: #1e40af;
+  --vc-primary-800: #1e3a8a;
+  --vc-primary-900: #1e293b;
+
+  /* Variaciones de Secundario (Verde) */
+  --vc-secondary-50: #ecfdf5;
+  --vc-secondary-100: #d1fae5;
+  --vc-secondary-200: #a7f3d0;
+  --vc-secondary-300: #6ee7b7;
+  --vc-secondary-400: #34d399;
+  --vc-secondary-500: #059669;   /* Color base */
+  --vc-secondary-600: #047857;
+  --vc-secondary-700: #065f46;
+  --vc-secondary-800: #064e3b;
+  --vc-secondary-900: #022c22;
+
+  /* Variaciones de Acento (Rojo) */
+  --vc-accent-50: #fef2f2;
+  --vc-accent-100: #fee2e2;
+  --vc-accent-200: #fecaca;
+  --vc-accent-300: #fca5a5;
+  --vc-accent-400: #f87171;
+  --vc-accent-500: #dc2626;     /* Color base */
+  --vc-accent-600: #b91c1c;
+  --vc-accent-700: #991b1b;
+  --vc-accent-800: #7f1d1d;
+  --vc-accent-900: #450a0a;
+
+  /* Colores Neutros */
+  --vc-gray-50: #f9fafb;
+  --vc-gray-100: #f3f4f6;
+  --vc-gray-200: #e5e7eb;
+  --vc-gray-300: #d1d5db;
+  --vc-gray-400: #9ca3af;
+  --vc-gray-500: #6b7280;
+  --vc-gray-600: #4b5563;
+  --vc-gray-700: #374151;
+  --vc-gray-800: #1f2937;
+  --vc-gray-900: #111827;
+
+  /* Colores Semánticos */
+  --vc-success: var(--vc-secondary-500);
+  --vc-warning: #f59e0b;
+  --vc-error: var(--vc-accent-500);
+  --vc-info: var(--vc-primary-500);
+
+  /* Colores de Fondo */
+  --vc-bg-primary: #ffffff;
+  --vc-bg-secondary: var(--vc-gray-50);
+  --vc-bg-tertiary: var(--vc-gray-100);
+  --vc-bg-dark: var(--vc-gray-800);
+
+  /* Gradientes de Marca */
+  --vc-gradient-primary: linear-gradient(135deg, var(--vc-primary-500) 0%, var(--vc-primary-600) 100%);
+  --vc-gradient-secondary: linear-gradient(135deg, var(--vc-secondary-500) 0%, var(--vc-secondary-600) 100%);
+  --vc-gradient-brand: linear-gradient(135deg, var(--vc-primary-500) 0%, var(--vc-secondary-500) 100%);
+  --vc-gradient-background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+
+  /* Sombras */
+  --vc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --vc-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --vc-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --vc-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  --vc-shadow-primary: 0 4px 12px rgba(37, 99, 235, 0.3);
+  --vc-shadow-secondary: 0 4px 12px rgba(5, 150, 105, 0.3);
+  --vc-shadow-accent: 0 4px 12px rgba(220, 38, 38, 0.3);
+
+  /* Colores por Rol (usando la paleta de marca) */
+  --vc-role-superadmin: var(--vc-accent-500);
+  --vc-role-admin: #8b5cf6;
+  --vc-role-aseguradora: var(--vc-secondary-500);
+  --vc-role-taller: #f59e0b;
+  --vc-role-concesionaria: var(--vc-primary-500);
+  --vc-role-consumer: var(--vc-gray-500);
+}
+
+/* Modo Oscuro (opcional para futuras implementaciones) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vc-bg-primary: var(--vc-gray-900);
+    --vc-bg-secondary: var(--vc-gray-800);
+    --vc-bg-tertiary: var(--vc-gray-700);
+  }
+}
+
+/* Clases de Utilidad para Colores */
+.vc-text-primary { color: var(--vc-primary-500); }
+.vc-text-secondary { color: var(--vc-secondary-500); }
+.vc-text-accent { color: var(--vc-accent-500); }
+
+.vc-bg-primary { background-color: var(--vc-primary-500); }
+.vc-bg-secondary { background-color: var(--vc-secondary-500); }
+.vc-bg-accent { background-color: var(--vc-accent-500); }
+
+.vc-border-primary { border-color: var(--vc-primary-500); }
+.vc-border-secondary { border-color: var(--vc-secondary-500); }
+.vc-border-accent { border-color: var(--vc-accent-500); }
+
+.vc-gradient-primary { background: var(--vc-gradient-primary); }
+.vc-gradient-secondary { background: var(--vc-gradient-secondary); }
+.vc-gradient-brand { background: var(--vc-gradient-brand); }

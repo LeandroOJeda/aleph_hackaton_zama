@@ -11,13 +11,14 @@ function Consultas() {
     const [patente, setPatente] = useState("")
     const [hasSearched, setHasSearched] = useState(false)
     const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleChange = (event) => {
         setPatente(event.target.value)
         setError("") // Limpiar error al escribir
     }
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault()
 
         if (!patente.trim()) {
@@ -25,21 +26,39 @@ function Consultas() {
             return
         }
 
-        dispatch(getAuto(patente))
-        setHasSearched(true)
+        setIsLoading(true)
         setError("")
+        
+        // Limpiar datos anteriores antes de la nueva búsqueda
+        dispatch({type:"DATA_AUTO", payload: null})
+        
+        try {
+            await dispatch(getAuto(patente))
+            setHasSearched(true)
+        } catch (error) {
+            setError("Error al buscar el vehículo. Intente nuevamente.")
+            setHasSearched(false)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const handleClear = () => {
         setPatente("")
         setHasSearched(false)
         setError("")
+        setIsLoading(false)
+        // Limpiar datos de Redux
+        dispatch({type:"DATA_AUTO", payload: null})
     }
 
     const handleBack = () => {
         setHasSearched(false)
         setPatente("")
         setError("")
+        setIsLoading(false)
+        // Limpiar datos de Redux
+        dispatch({type:"DATA_AUTO", payload: null})
     }
 
     // Si hay datos y se ha buscado, mostrar solo el resultado
@@ -114,8 +133,29 @@ function Consultas() {
                             </div>
                         )}
 
+                        {/* Loading Message */}
+                        {isLoading && (
+                            <div
+                                className="mb-3 p-3 text-center fw-semibold"
+                                style={{
+                                    backgroundColor: '#d1ecf1',
+                                    color: '#0c5460',
+                                    borderRadius: '10px',
+                                    border: '1px solid #b8daff',
+                                    fontSize: '0.9rem'
+                                }}
+                            >
+                                <div className="d-flex align-items-center justify-content-center">
+                                    <div className="spinner-border spinner-border-sm me-2" role="status">
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                    Buscando vehículo...
+                                </div>
+                            </div>
+                        )}
+
                         {/* Search Result Message */}
-                        {hasSearched && (!dataAuto || !dataAuto.id) && (
+                        {hasSearched && !isLoading && (!dataAuto || !dataAuto.id) && (
                             <div
                                 className="mb-3 p-3 text-center fw-semibold"
                                 style={{
@@ -137,6 +177,7 @@ function Consultas() {
                                     type="button"
                                     className="btn w-100 fw-semibold"
                                     onClick={handleClear}
+                                    disabled={isLoading}
                                     style={{
                                         backgroundColor: '#6c757d',
                                         color: 'white',
@@ -153,6 +194,7 @@ function Consultas() {
                                 <button
                                     type="submit"
                                     className="btn w-100 fw-semibold"
+                                    disabled={isLoading}
                                     style={{
                                         backgroundColor: '#17a2b8',
                                         color: 'white',
@@ -162,7 +204,7 @@ function Consultas() {
                                         fontSize: '1rem'
                                     }}
                                 >
-                                    Buscar
+                                    {isLoading ? 'Buscando...' : 'Buscar'}
                                 </button>
                             </div>
                         </div>
