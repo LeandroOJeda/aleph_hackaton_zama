@@ -1,18 +1,16 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import validation from "./validation.js";
 import Swal from "sweetalert2";
 import { logIn } from "../../redux/action.js";
 import style from "./Login.module.css";
-// import LoadingOverlay from "../../components/LoadingOverlay/LoadingOverlay.jsx";
 
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false); // Estado para el overlay
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
     email: "",
     password: "",
@@ -53,13 +51,9 @@ function Login() {
     }
 
     if (error.email === "" && error.password === "") {
-      setLoading(true); // Mostrar overlay
+      setLoading(true);
       try {
-        // Intentar iniciar sesión
         await dispatch(logIn(user, navigate, Swal));
-
-        // Si el inicio de sesión fue exitoso, actualizar el rol del usuario en Redux
-        // dispatch(setRolUsuario());
         console.log("Inicio de sesión exitoso y rol actualizado en Redux");
       } catch (err) {
         console.error("Error durante el inicio de sesión", err);
@@ -69,250 +63,95 @@ function Login() {
           "error"
         );
       } finally {
-        setLoading(false); // Ocultar overlay
+        setLoading(false);
       }
     }
   };
 
-  const register = () => {
-    navigate("/signUp");
-  };
-
   return (
-    <div className={style.bigDiv}>
-      <div className={style.divForm}>
-        <h3 className={style.titulo}>Iniciar Sesion</h3>
-        <form onSubmit={handleSubmit} className={style.form}>
-          {/* <div class="form-floating mb-3">
-            <input
-              type="email"
-              class="form-control"
-              id="floatingInput"
-              name="email"
-              placeholder="name@example.com"
-              onChange={handleChange}
-            ></input>
-            <label for="floatingInput">Email</label>
-          </div> */}
-          <div className={`mb-3 ${style.divInput}`}>
-            <input
-              type="email"
-              className="form-control"
-              id="exampleInputEmail1"
-              placeholder="Email"
-              name="email"
-              onChange={handleChange}
-            ></input>
-            <label className={`form-label ${style.errorLabel}`}>
-              {showError.email}
-            </label>
+    <div className={style.container}>
+      <div className={style.card}>
+        {/* Header with Icon and Title */}
+        <div className={style.header}>
+          <div className={style.iconContainer}>
+            <div className={style.iconWrapper}>
+              {/* Car Icon */}
+              <svg className={style.carIcon} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5,11L6.5,6.5H17.5L19,11M17.5,16A1.5,1.5 0 0,1 16,14.5A1.5,1.5 0 0,1 17.5,13A1.5,1.5 0 0,1 19,14.5A1.5,1.5 0 0,1 17.5,16M6.5,16A1.5,1.5 0 0,1 5,14.5A1.5,1.5 0 0,1 6.5,13A1.5,1.5 0 0,1 8,14.5A1.5,1.5 0 0,1 6.5,16M18.92,6C18.72,5.42 18.16,5 17.5,5H6.5C5.84,5 5.28,5.42 5.08,6L3,12V20A1,1 0 0,0 4,21H5A1,1 0 0,0 6,20V19H18V20A1,1 0 0,0 19,21H20A1,1 0 0,0 21,20V12L18.92,6Z"/>
+              </svg>
+              {/* Shield Icon (smaller) */}
+              <svg className={style.shieldIcon} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C9.24,7 7,9.24 7,12S9.24,17 12,17S17,14.76 17,12S14.76,7 12,7M12,8.5C13.93,8.5 15.5,10.07 15.5,12S13.93,15.5 12,15.5S8.5,13.93 8.5,12S10.07,8.5 12,8.5Z"/>
+              </svg>
+            </div>
           </div>
-          <div className={`mb-3 ${style.divInput}`}>
-            <input
-              className="form-control"
-              id="exampleInputPassword1"
-              placeholder="Contraseña"
-              name="password"
-              type="password"
-              onChange={handleChange}
-            ></input>
-            <label className={`form-label ${style.errorLabel}`}>
-              {showError.password}
-            </label>
-          </div>
-          <div className={style.divButton}>
+          <h1 className={style.title}>VehicleChain</h1>
+          <p className={style.subtitle}>
+            Historial vehicular certificado por blockchain
+          </p>
+        </div>
+
+        {/* Login Form */}
+        <div className={style.content}>
+          <form onSubmit={handleSubmit} className={style.form}>
+            <div className={style.inputGroup}>
+              <label htmlFor="email" className={style.label}>
+                Correo electrónico
+              </label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="usuario@ejemplo.com"
+                value={user.email}
+                onChange={handleChange}
+                className={`${style.input} ${showError.email ? style.inputError : ''}`}
+                disabled={loading}
+                required
+              />
+              {showError.email && (
+                <div className={style.errorAlert}>
+                  <span className={style.errorMessage}>{showError.email}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={style.inputGroup}>
+              <label htmlFor="password" className={style.label}>
+                Contraseña
+              </label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                value={user.password}
+                onChange={handleChange}
+                className={`${style.input} ${showError.password ? style.inputError : ''}`}
+                disabled={loading}
+                required
+              />
+              {showError.password && (
+                <div className={style.errorAlert}>
+                  <span className={style.errorMessage}>{showError.password}</span>
+                </div>
+              )}
+            </div>
+
             <button
               type="submit"
-              className={`btn btn-primary ${style.button1}`}
+              className={style.submitButton}
               disabled={loading}
             >
-              Iniciar Sesion
+              {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </button>
-            <button
-              type="button"
-              className={`btn btn-primary ${style.button2}`}
-              onClick={register}
-              disabled={loading}
-            >
-              Registrarse
-            </button>
-          </div>
-        </form>
+          </form>
+
+
+        </div>
       </div>
-      {/* Overlay para el estado de carga */}
-      {/* <LoadingOverlay isVisible={loading} /> */}
     </div>
   );
 }
 
 export default Login;
-
-// import React from "react";
-// import { useState } from "react";
-// import validation from "./Validation";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useNavigate } from "react-router-dom";
-// import Swal from "sweetalert2";
-// import { logIn } from "../../redux/actions";
-// import style from "./Login.module.css";
-// import { setRolUsuario } from "../../redux/actions";
-
-// function Login() {
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-//   const [error, setError] = useState({
-//     email: "",
-//     password: "",
-//   });
-
-//   const [user, setUser] = useState({
-//     email: "",
-//     password: "",
-//   });
-
-//   const [showError, setShowError] = useState({
-//     email: "",
-//     password: "",
-//   });
-
-//   const handleChange = (event) => {
-//     const property = event.target.name;
-//     const value = event.target.value;
-//     setUser({ ...user, [property]: value });
-//     setError(validation({ ...user, [property]: value }));
-//   };
-
-//   const handleSubmit = async (event) => {
-//     setShowError({
-//       ...showError,
-//       email: error.email,
-//       password: error.password,
-//     });
-//     event.preventDefault();
-//     if (user.email == "" && user.password == "") {
-//       setError(validation(user));
-//       setShowError({
-//         ...showError,
-//         email: "Por favor, ingresa tu dirección de email",
-//         password: "Por favor, ingresa tu contraseña",
-//       });
-//       return console.log("faltan datos");
-//     }
-//     if (error.email == "" && error.password == "") {
-//       console.log(user);
-
-//       dispatch(logIn(user, navigate, Swal));
-//       console.log("se comprueba el inicio de sesion");
-//     }
-//   };
-
-//   const register = () => {
-//     dispatch(setRolUsuario());
-//     const rol = useSelector((state) => {
-//       state.rolUsuario;
-//     });
-//     console.log("pasa por aca 2222");
-
-//     navigate("/signUp");
-//   };
-
-//   return (
-//     <div className={style.bigDiv}>
-//       {/* <form onSubmit={handleSubmit}>
-//         <input
-//           placeholder="Email"
-//           name="email"
-//           type="Email"
-//           onChange={(event) => {
-//             handleChange(event);
-//           }}
-//         ></input>
-//         <label>{showError.email}</label>
-
-//         <input
-//           placeholder="Contraseña"
-//           name="password"
-//           type="Password"
-//           onChange={(event) => {
-//             handleChange(event);
-//           }}
-//         ></input>
-//         <label>{showError.password}</label>
-
-//         <button type="submit">Iniciar Sesion</button>
-//       </form> */}
-
-//       <div className={style.divForm}>
-//         <h3 className={style.titulo}>Iniciar Sesion</h3>
-//         <form onSubmit={handleSubmit} className={style.form}>
-//           <div className={`mb-3 ${style.divInput}`}>
-//             <input
-//               type="email"
-//               class="form-control"
-//               id="exampleInputEmail1"
-//               aria-describedby="emailHelp"
-//               placeholder="Email"
-//               name="email"
-//               onChange={(event) => {
-//                 handleChange(event);
-//               }}
-//             ></input>
-//             <label
-//               for="exampleInputEmail1"
-//               className={`form-label ${style.errorLabel}`}
-//             >
-//               {showError.email}
-//             </label>
-//             {/* <div id="emailHelp" class="form-text">
-//             We'll never share your email with anyone else.
-//           </div> */}
-//           </div>
-//           <div className={`mb-3 ${style.divInput}`}>
-//             <input
-//               class="form-control"
-//               id="exampleInputPassword1"
-//               placeholder="Contraseña"
-//               name="password"
-//               type="password"
-//               onChange={(event) => {
-//                 handleChange(event);
-//               }}
-//             ></input>
-//             <label
-//               for="exampleInputPassword1"
-//               className={`form-label ${style.errorLabel}`}
-//             >
-//               {showError.password}
-//             </label>
-//           </div>
-//           {/* <div class="mb-3 form-check">
-//             <input
-//               type="checkbox"
-//               class="form-check-input"
-//               id="exampleCheck1"
-//             ></input>
-//           </div> */}
-//           <div className={style.divButton}>
-//             <button
-//               type="submit"
-//               className={`btn btn-primary ${style.button1}`}
-//             >
-//               Iniciar Sesion
-//             </button>
-//             <button
-//               className={`btn btn-primary ${style.button2}`}
-//               onClick={register}
-//             >
-//               Registrarse
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Login;
-
-/////tailwind
-//https://tailwindui.com/components/application-ui/forms/sign-in-forms

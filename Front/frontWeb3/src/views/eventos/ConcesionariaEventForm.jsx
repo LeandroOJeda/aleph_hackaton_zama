@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { createEvent } from '../../redux/action';
-import styles from '../aseguradoras_form/AseguradorasForm.module.css';
+import styles from './EventForm.module.css';
 
 function ConcesionariaEventForm() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         kilometers: '',
         description: '',
         eventDate: '',
         location: '',
         vehicleId: '',
-        eventType: 'sale', // Campo específico para Concesionaria
+        eventType: 'sale',
         salesPerson: '',
         customerInfo: '',
         salePrice: '',
@@ -39,8 +41,8 @@ function ConcesionariaEventForm() {
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.kilometers || formData.kilometers < 0) {
-            newErrors.kilometers = 'Los kilómetros son requeridos';
+        if (!formData.kilometers || formData.kilometers <= 0) {
+            newErrors.kilometers = 'Los kilómetros son requeridos y deben ser mayor a 0';
         }
 
         if (!formData.description.trim()) {
@@ -60,11 +62,11 @@ function ConcesionariaEventForm() {
         }
 
         if (!formData.salesPerson.trim()) {
-            newErrors.salesPerson = 'El vendedor es requerido';
+            newErrors.salesPerson = 'El nombre del vendedor es requerido';
         }
 
-        if (formData.eventType === 'sale' && (!formData.salePrice || formData.salePrice <= 0)) {
-            newErrors.salePrice = 'El precio de venta es requerido para ventas';
+        if (formData.eventType === 'sale' && !formData.customerInfo.trim()) {
+            newErrors.customerInfo = 'La información del cliente es requerida para ventas';
         }
 
         setErrors(newErrors);
@@ -85,14 +87,15 @@ function ConcesionariaEventForm() {
             const eventData = {
                 ...formData,
                 kilometers: parseInt(formData.kilometers),
-                salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
-                warranty: parseInt(formData.warranty),
-                eventDate: new Date(formData.eventDate).toISOString()
+                eventDate: new Date(formData.eventDate).toISOString(),
+                salePrice: formData.salePrice ? parseFloat(formData.salePrice) : 0,
+                warranty: parseInt(formData.warranty)
             };
 
             await dispatch(createEvent(eventData));
-            setSubmitMessage('Evento de Concesionaria registrado exitosamente');
+            setSubmitMessage('Evento registrado exitosamente');
             
+            // Reset form
             setFormData({
                 kilometers: '',
                 description: '',
@@ -114,183 +117,209 @@ function ConcesionariaEventForm() {
         }
     };
 
-    const handleReset = () => {
-        setFormData({
-            kilometers: '',
-            description: '',
-            eventDate: '',
-            location: '',
-            vehicleId: '',
-            eventType: 'sale',
-            salesPerson: '',
-            customerInfo: '',
-            salePrice: '',
-            warranty: '12'
-        });
-        setErrors({});
-        setSubmitMessage('');
+    const handleBack = () => {
+        navigate('/form');
     };
 
     return (
-        <div className={styles.bigDiv}>
-            <div className={styles.divForm}>
-                <h1 className={styles.titulo}>Registro de Evento - Concesionaria</h1>
-                
-                <form className={styles.form} onSubmit={handleSubmit}>
-                    <div className={styles.divInput}>
-                        <select
-                            name="eventType"
-                            value={formData.eventType}
-                            onChange={handleChange}
-                            className={errors.eventType ? styles.inputError : ''}
-                        >
-                            <option value="sale">Venta de Vehículo</option>
-                            <option value="delivery">Entrega de Vehículo</option>
-                            <option value="test_drive">Prueba de Manejo</option>
-                            <option value="inspection">Inspección Pre-entrega</option>
-                            <option value="warranty_service">Servicio de Garantía</option>
-                        </select>
-                        {errors.eventType && <span className={styles.errorLabel}>{errors.eventType}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="text"
-                            name="salesPerson"
-                            placeholder="Nombre del Vendedor"
-                            value={formData.salesPerson}
-                            onChange={handleChange}
-                            className={errors.salesPerson ? styles.inputError : ''}
-                        />
-                        {errors.salesPerson && <span className={styles.errorLabel}>{errors.salesPerson}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="text"
-                            name="customerInfo"
-                            placeholder="Información del Cliente (opcional)"
-                            value={formData.customerInfo}
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    {formData.eventType === 'sale' && (
-                        <div className={styles.divInput}>
-                            <input
-                                type="number"
-                                step="0.01"
-                                name="salePrice"
-                                placeholder="Precio de Venta"
-                                value={formData.salePrice}
-                                onChange={handleChange}
-                                className={errors.salePrice ? styles.inputError : ''}
-                                min="0"
-                            />
-                            {errors.salePrice && <span className={styles.errorLabel}>{errors.salePrice}</span>}
-                        </div>
-                    )}
-
-                    <div className={styles.divInput}>
-                        <select
-                            name="warranty"
-                            value={formData.warranty}
-                            onChange={handleChange}
-                        >
-                            <option value="6">6 meses de garantía</option>
-                            <option value="12">12 meses de garantía</option>
-                            <option value="24">24 meses de garantía</option>
-                            <option value="36">36 meses de garantía</option>
-                        </select>
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="number"
-                            name="kilometers"
-                            placeholder="Kilómetros del Vehículo"
-                            value={formData.kilometers}
-                            onChange={handleChange}
-                            className={errors.kilometers ? styles.inputError : ''}
-                            min="0"
-                        />
-                        {errors.kilometers && <span className={styles.errorLabel}>{errors.kilometers}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <textarea
-                            name="description"
-                            placeholder="Descripción del evento"
-                            value={formData.description}
-                            onChange={handleChange}
-                            className={`${styles.textarea} ${errors.description ? styles.inputError : ''}`}
-                            rows="3"
-                        />
-                        {errors.description && <span className={styles.errorLabel}>{errors.description}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="datetime-local"
-                            name="eventDate"
-                            value={formData.eventDate}
-                            onChange={handleChange}
-                            className={errors.eventDate ? styles.inputError : ''}
-                        />
-                        {errors.eventDate && <span className={styles.errorLabel}>{errors.eventDate}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="text"
-                            name="location"
-                            placeholder="Ubicación de la Concesionaria"
-                            value={formData.location}
-                            onChange={handleChange}
-                            className={errors.location ? styles.inputError : ''}
-                        />
-                        {errors.location && <span className={styles.errorLabel}>{errors.location}</span>}
-                    </div>
-
-                    <div className={styles.divInput}>
-                        <input
-                            type="text"
-                            name="vehicleId"
-                            placeholder="ID del Vehículo"
-                            value={formData.vehicleId}
-                            onChange={handleChange}
-                            className={errors.vehicleId ? styles.inputError : ''}
-                        />
-                        {errors.vehicleId && <span className={styles.errorLabel}>{errors.vehicleId}</span>}
-                    </div>
-
-                    <div className={styles.divButton}>
-                        <button 
-                            type="button" 
-                            className={styles.button1}
-                            onClick={handleReset}
-                            disabled={isSubmitting}
-                        >
-                            Limpiar
-                        </button>
-                        
-                        <button 
-                            type="submit" 
-                            className={styles.button2}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Enviando...' : 'Registrar Evento'}
-                        </button>
-                    </div>
-                </form>
-
-                {submitMessage && (
-                    <div className={`${styles.message} ${
-                        submitMessage.includes('Error') ? styles.errorMessage : styles.successMessage
-                    }`}>
-                        {submitMessage}
+        <div className={styles.container}>
+            <div className={styles.card}>
+                {isSubmitting && (
+                    <div className={styles.loadingOverlay}>
+                        <div className={styles.spinner}></div>
                     </div>
                 )}
+                
+                <div className={styles.header}>
+                    <h1 className={styles.title}>Registro de Evento</h1>
+                    <p className={styles.subtitle}>Concesionaria - Ventas y Servicios</p>
+                </div>
+                
+                <div className={styles.content}>
+                    <form className={styles.form} onSubmit={handleSubmit}>
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="eventType" className={styles.label}>Tipo de Evento</label>
+                            <select
+                                id="eventType"
+                                name="eventType"
+                                value={formData.eventType}
+                                onChange={handleChange}
+                                className={`${styles.select} ${errors.eventType ? styles.inputError : ''}`}
+                            >
+                                <option value="sale">Venta de Vehículo</option>
+                                <option value="delivery">Entrega de Vehículo</option>
+                                <option value="test_drive">Prueba de Manejo</option>
+                                <option value="inspection">Inspección Pre-entrega</option>
+                                <option value="warranty_service">Servicio de Garantía</option>
+                            </select>
+                            {errors.eventType && <div className={styles.errorMessage}>{errors.eventType}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="salesPerson" className={styles.label}>Vendedor</label>
+                            <input
+                                id="salesPerson"
+                                type="text"
+                                name="salesPerson"
+                                placeholder="Nombre del vendedor responsable"
+                                value={formData.salesPerson}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.salesPerson ? styles.inputError : ''}`}
+                            />
+                            {errors.salesPerson && <div className={styles.errorMessage}>{errors.salesPerson}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="customerInfo" className={styles.label}>Información del Cliente</label>
+                            <textarea
+                                id="customerInfo"
+                                name="customerInfo"
+                                placeholder="Nombre, contacto y datos relevantes del cliente"
+                                value={formData.customerInfo}
+                                onChange={handleChange}
+                                className={`${styles.textarea} ${errors.customerInfo ? styles.inputError : ''}`}
+                                rows="3"
+                            />
+                            {errors.customerInfo && <div className={styles.errorMessage}>{errors.customerInfo}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="salePrice" className={styles.label}>Precio de Venta</label>
+                            <input
+                                id="salePrice"
+                                type="number"
+                                name="salePrice"
+                                placeholder="Precio final de venta"
+                                value={formData.salePrice}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.salePrice ? styles.inputError : ''}`}
+                                min="0"
+                                step="0.01"
+                            />
+                            {errors.salePrice && <div className={styles.errorMessage}>{errors.salePrice}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="warranty" className={styles.label}>Garantía (meses)</label>
+                            <select
+                                id="warranty"
+                                name="warranty"
+                                value={formData.warranty}
+                                onChange={handleChange}
+                                className={`${styles.select} ${errors.warranty ? styles.inputError : ''}`}
+                            >
+                                <option value="6">6 meses</option>
+                                <option value="12">12 meses</option>
+                                <option value="24">24 meses</option>
+                                <option value="36">36 meses</option>
+                            </select>
+                            {errors.warranty && <div className={styles.errorMessage}>{errors.warranty}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="kilometers" className={styles.label}>Kilómetros</label>
+                            <input
+                                id="kilometers"
+                                type="number"
+                                name="kilometers"
+                                placeholder="Kilómetros del vehículo"
+                                value={formData.kilometers}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.kilometers ? styles.inputError : ''}`}
+                                min="0"
+                            />
+                            {errors.kilometers && <div className={styles.errorMessage}>{errors.kilometers}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="description" className={styles.label}>Descripción</label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                placeholder="Detalles del evento, condiciones especiales, etc."
+                                value={formData.description}
+                                onChange={handleChange}
+                                className={`${styles.textarea} ${errors.description ? styles.inputError : ''}`}
+                                rows="4"
+                            />
+                            {errors.description && <div className={styles.errorMessage}>{errors.description}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="eventDate" className={styles.label}>Fecha y Hora</label>
+                            <input
+                                id="eventDate"
+                                type="datetime-local"
+                                name="eventDate"
+                                value={formData.eventDate}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.eventDate ? styles.inputError : ''}`}
+                            />
+                            {errors.eventDate && <div className={styles.errorMessage}>{errors.eventDate}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="location" className={styles.label}>Ubicación</label>
+                            <input
+                                id="location"
+                                type="text"
+                                name="location"
+                                placeholder="Ubicación de la concesionaria"
+                                value={formData.location}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.location ? styles.inputError : ''}`}
+                            />
+                            {errors.location && <div className={styles.errorMessage}>{errors.location}</div>}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="vehicleId" className={styles.label}>ID del Vehículo</label>
+                            <input
+                                id="vehicleId"
+                                type="text"
+                                name="vehicleId"
+                                placeholder="Identificador único del vehículo"
+                                value={formData.vehicleId}
+                                onChange={handleChange}
+                                className={`${styles.input} ${errors.vehicleId ? styles.inputError : ''}`}
+                            />
+                            {errors.vehicleId && <div className={styles.errorMessage}>{errors.vehicleId}</div>}
+                        </div>
+
+                        <div className={styles.buttonGroup}>
+                            <button 
+                                type="button" 
+                                className={styles.backButton}
+                                onClick={handleBack}
+                                disabled={isSubmitting}
+                            >
+                                <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                Volver
+                            </button>
+                            
+                            <button 
+                                type="submit" 
+                                className={styles.submitButton}
+                                disabled={isSubmitting}
+                            >
+                                <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                {isSubmitting ? 'Registrando...' : 'Registrar Evento'}
+                            </button>
+                        </div>
+                    </form>
+
+                    {submitMessage && (
+                        <div className={`${styles.messageContainer} ${
+                            submitMessage.includes('Error') ? styles.errorMessageContainer : styles.successMessage
+                        }`}>
+                            {submitMessage}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
