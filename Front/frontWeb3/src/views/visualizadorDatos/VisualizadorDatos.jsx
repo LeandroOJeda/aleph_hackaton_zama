@@ -1,7 +1,8 @@
 import React from 'react'
-
+import { useNavigate } from 'react-router-dom'
 
 const VehicleDisplay = ({ vehicleData, onBack }) => {
+    const navigate = useNavigate()
     const {
         id,
         licensePlate,
@@ -9,8 +10,22 @@ const VehicleDisplay = ({ vehicleData, onBack }) => {
         location,
         brand,
         model,
-        isActive
+        isActive,
+        blockchain
     } = vehicleData
+
+    // Determinar el estado del certificado blockchain
+    const isBlockchainVerified = blockchain?.verified || false
+    const blockchainStatus = isBlockchainVerified ? 'Verificado' : 'No Verificado'
+    const blockchainColor = isBlockchainVerified ? '#28a745' : '#dc3545'
+    const blockchainIcon = isBlockchainVerified ? 'fas fa-check-circle' : 'fas fa-times-circle'
+
+    // Función para manejar la consulta de historial
+    const handleConsultarHistorial = () => {
+        navigate('/simulacion-pago', { 
+            state: { vehicleData } 
+        })
+    }
 
     return (
         <div
@@ -153,17 +168,61 @@ const VehicleDisplay = ({ vehicleData, onBack }) => {
                                 className="form-control d-flex align-items-center justify-content-between"
                                 style={{
                                     backgroundColor: 'white',
-                                    border: '2px solid #28a745',
+                                    border: `2px solid ${blockchainColor}`,
                                     borderRadius: '10px',
                                     padding: '12px',
                                     fontSize: '1.1rem',
-                                    color: '#28a745'
+                                    color: blockchainColor
                                 }}
                             >
-                                <span className="fw-semibold">Verificado</span>
-                                <i className="fas fa-check-circle"></i>
+                                <span className="fw-semibold">{blockchainStatus}</span>
+                                <i className={blockchainIcon}></i>
                             </div>
                         </div>
+
+                        {/* Información adicional de blockchain si está verificado */}
+                        {isBlockchainVerified && blockchain && (
+                            <>
+                                {/* VTV Status */}
+                                <div className="col-md-6">
+                                    <label className="form-label fw-semibold text-secondary mb-2">Estado VTV</label>
+                                    <div
+                                        className="form-control d-flex align-items-center justify-content-center"
+                                        style={{
+                                            backgroundColor: 'white',
+                                            border: `2px solid ${blockchain.hasValidVTV ? '#28a745' : '#ffc107'}`,
+                                            borderRadius: '10px',
+                                            padding: '12px',
+                                            fontSize: '1rem',
+                                            color: blockchain.hasValidVTV ? '#28a745' : '#856404'
+                                        }}
+                                    >
+                                        <span className="fw-semibold">
+                                            {blockchain.hasValidVTV ? 'Vigente' : 'Vencida'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Last Kilometers */}
+                                <div className="col-md-6">
+                                    <label className="form-label fw-semibold text-secondary mb-2">Último Kilometraje</label>
+                                    <div
+                                        className="form-control text-center"
+                                        style={{
+                                            backgroundColor: 'white',
+                                            border: '2px solid #17a2b8',
+                                            borderRadius: '10px',
+                                            padding: '12px',
+                                            fontSize: '1rem',
+                                            color: '#17a2b8',
+                                            fontFamily: 'monospace'
+                                        }}
+                                    >
+                                        <span className="fw-semibold">{blockchain.lastKilometers} km</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
 
                         {/* System ID */}
                         <div className="col-12">
@@ -207,6 +266,7 @@ const VehicleDisplay = ({ vehicleData, onBack }) => {
                         <div className="col-6">
                             <button
                                 className="btn w-100 fw-semibold"
+                                onClick={handleConsultarHistorial}
                                 style={{
                                     backgroundColor: '#17a2b8',
                                     color: 'white',
@@ -216,7 +276,8 @@ const VehicleDisplay = ({ vehicleData, onBack }) => {
                                     fontSize: '1rem'
                                 }}
                             >
-                                Descargar Certificado
+                                <i className="fas fa-history me-2"></i>
+                                Consultar Historial
                             </button>
                         </div>
                     </div>

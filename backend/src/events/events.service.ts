@@ -7,6 +7,9 @@ import { Event } from './entities/event.entity';
 import { Vehicle } from '../vehicles/entities/vehicle.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { PaginationDto } from '../common/dtos/pagination.dto';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class EventsService {
@@ -19,15 +22,19 @@ export class EventsService {
     private readonly vehicleRepository: Repository<Vehicle>,
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(createEventDto: CreateEventDto, organizationId: string) {
     try {
-      const { vehicleId, eventDate, ...eventData } = createEventDto;
+      const { licensePlate, eventDate, ...eventData } = createEventDto;
 
-      const vehicle = await this.vehicleRepository.findOneBy({ id: vehicleId });
+      const vehicle = await this.vehicleRepository.findOne({
+        where: { licensePlate: licensePlate.toUpperCase() }
+      });
       if (!vehicle) {
-        throw new NotFoundException(`Vehicle with id ${vehicleId} not found`);
+        throw new NotFoundException(`Vehicle with license plate ${licensePlate} not found`);
       }
 
       const organization = await this.organizationRepository.findOneBy({ id: organizationId });
@@ -35,6 +42,7 @@ export class EventsService {
         throw new NotFoundException(`Organization with id ${organizationId} not found`);
       }
 
+      // Crear evento en base de datos local
       const event = this.eventRepository.create({
         ...eventData,
         eventDate: new Date(eventDate),
@@ -43,6 +51,22 @@ export class EventsService {
       });
 
       await this.eventRepository.save(event);
+
+      // Crear bloque en blockchain
+      try {
+        const blockchainResult = await this.createBlockchainBlock(vehicle.licensePlate, createEventDto.kilometers, createEventDto.description, organization.name);
+        
+        // Actualizar evento con información de blockchain
+        event.blockchainBlockId = blockchainResult.blockId;
+        event.blockchainTxHash = blockchainResult.transactionHash;
+        await this.eventRepository.save(event);
+        
+        this.logger.log(`Blockchain block created for event ${event.id}: Block ID ${blockchainResult.blockId}`);
+      } catch (blockchainError) {
+        this.logger.warn(`Failed to create blockchain block for event ${event.id}: ${blockchainError.message}`);
+        // El evento se crea aunque falle la blockchain
+      }
+
       return event;
     } catch (error) {
       this.handleDBErrors(error);
@@ -69,20 +93,46 @@ export class EventsService {
   }
 
   async findByVehicle(vehicleId: string, paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0 } = paginationDto;
-    
-    const events = await this.eventRepository.find({
-      where: { 
-        vehicle: { id: vehicleId },
-        isActive: true 
-      },
-      relations: ['vehicle', 'organization'],
-      take: limit,
-      skip: offset,
-      order: { eventDate: 'DESC' }
-    });
+    // Primero obtenemos el vehículo para conseguir la patente
+    const vehicle = await this.vehicleRepository.findOneBy({ id: vehicleId });
+    if (!vehicle) {
+      throw new NotFoundException(`Vehicle with id ${vehicleId} not found`);
+    }
 
-    return events;
+    // Consultar historial desde blockchain usando la patente
+    try {
+      const microserviceUrl = this.configService.get('MICROSERVICE_URL') || 'http://localhost:3001';
+      const response = await firstValueFrom(
+        this.httpService.get(`${microserviceUrl}/api/vehicles/${vehicle.licensePlate}/blocks`)
+      );
+
+      if (response.data && response.data.success) {
+        // Mapear los bloques de blockchain a formato de eventos
+        const blockchainBlocks = response.data.data || [];
+        const mappedEvents = blockchainBlocks.map(block => ({
+          id: block.blockId,
+          kilometers: parseInt(block.kilometers) || 0,
+          description: block.details || 'Sin descripción',
+          eventDate: new Date(parseInt(block.timestamp) * 1000), // Convertir timestamp
+          location: block.origin || 'Ubicación desconocida',
+          isActive: true,
+          vehicle: vehicle,
+          organization: {
+            name: block.origin || 'Organización desconocida',
+            type: 'blockchain'
+          }
+        }));
+
+        return mappedEvents;
+      } else {
+        // Si no hay datos en blockchain, retornar array vacío
+        return [];
+      }
+    } catch (error) {
+      this.logger.warn(`Could not fetch blockchain history for vehicle ${vehicle.licensePlate}: ${error.message}`);
+      // En caso de error, retornar array vacío
+      return [];
+    }
   }
 
   async findOne(id: string) {
@@ -113,12 +163,14 @@ export class EventsService {
     }
 
     try {
-      const { vehicleId, eventDate, ...eventData } = updateEventDto;
+      const { licensePlate, eventDate, ...eventData } = updateEventDto;
       
-      if (vehicleId) {
-        const vehicle = await this.vehicleRepository.findOneBy({ id: vehicleId });
+      if (licensePlate) {
+        const vehicle = await this.vehicleRepository.findOne({
+          where: { licensePlate: licensePlate.toUpperCase() }
+        });
         if (!vehicle) {
-          throw new NotFoundException(`Vehicle with id ${vehicleId} not found`);
+          throw new NotFoundException(`Vehicle with license plate ${licensePlate} not found`);
         }
         event.vehicle = vehicle;
       }
@@ -157,6 +209,32 @@ export class EventsService {
     } catch (error) {
       this.handleDBErrors(error);
     }
+  }
+
+  private async createBlockchainBlock(vehicleId: string, kilometers: number, details: string, origin: string) {
+    const microserviceUrl = this.configService.get('MICROSERVICE_URL') || 'http://localhost:3001';
+    
+    const blockData = {
+      vehicleId,
+      kilometers,
+      details,
+      origin
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.post(`${microserviceUrl}/api/vehicles/blocks`, blockData)
+    );
+
+    if (!response.data || !response.data.success) {
+      throw new Error(`Failed to create blockchain block: ${response.data?.message || 'Unknown error'}`);
+    }
+
+    return {
+      blockId: response.data.data.blockId,
+      transactionHash: response.data.data.transactionHash,
+      gasUsed: response.data.data.gasUsed,
+      blockNumber: response.data.data.blockNumber
+    };
   }
 
   private handleDBErrors(error: any): never {

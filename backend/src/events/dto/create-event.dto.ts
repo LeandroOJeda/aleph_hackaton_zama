@@ -2,7 +2,6 @@ import {
   IsString,
   IsNumber,
   IsDateString,
-  IsUUID,
   MinLength,
   MaxLength,
   IsPositive,
@@ -26,6 +25,8 @@ export class CreateEventDto {
   @MaxLength(100)
   location: string;
 
-  @IsUUID()
-  vehicleId: string;
+  @IsString()
+  @MinLength(1)
+  @MaxLength(20)
+  licensePlate: string;
 }

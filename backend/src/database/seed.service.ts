@@ -253,6 +253,13 @@ export class SeedService {
         location: 'Barranquilla, Colombia',
         brand: 'Hyundai',
         model: 'Accent 2022'
+      },
+      {
+        licensePlate: 'BNA946',
+        chassisNumber: 'VIN9988776655QRST',
+        location: 'Buenos Aires, Argentina',
+        brand: 'Ford',
+        model: 'Focus 2023'
       }
     ];
 

@@ -12,7 +12,7 @@ function AdminEventForm() {
         description: '',
         eventDate: '',
         location: '',
-        vehicleId: '',
+        licensePlate: '',
         eventType: 'inspection',
         adminNotes: '',
         priority: 'medium'
@@ -55,8 +55,8 @@ function AdminEventForm() {
             newErrors.location = 'La ubicación es requerida';
         }
 
-        if (!formData.vehicleId.trim()) {
-            newErrors.vehicleId = 'El ID del vehículo es requerido';
+        if (!formData.licensePlate.trim()) {
+            newErrors.licensePlate = 'La patente del vehículo es requerida';
         }
 
         setErrors(newErrors);
@@ -75,9 +75,11 @@ function AdminEventForm() {
 
         try {
             const eventData = {
-                ...formData,
                 kilometers: parseInt(formData.kilometers),
-                eventDate: new Date(formData.eventDate).toISOString()
+                description: formData.description,
+                eventDate: new Date(formData.eventDate).toISOString(),
+                location: formData.location,
+                licensePlate: formData.licensePlate
             };
 
             await dispatch(createEvent(eventData));
@@ -89,7 +91,7 @@ function AdminEventForm() {
                 description: '',
                 eventDate: '',
                 location: '',
-                vehicleId: '',
+                licensePlate: '',
                 eventType: 'inspection',
                 adminNotes: '',
                 priority: 'medium'
@@ -229,17 +231,17 @@ function AdminEventForm() {
                         </div>
 
                         <div className={styles.inputGroup}>
-                            <label htmlFor="vehicleId" className={styles.label}>ID del Vehículo</label>
+                            <label htmlFor="licensePlate" className={styles.label}>Patente del Vehículo</label>
                             <input
-                                id="vehicleId"
+                                id="licensePlate"
                                 type="text"
-                                name="vehicleId"
-                                placeholder="Identificador único del vehículo"
-                                value={formData.vehicleId}
+                                name="licensePlate"
+                                placeholder="Ej: ABC123, BNA946"
+                                value={formData.licensePlate}
                                 onChange={handleChange}
-                                className={`${styles.input} ${errors.vehicleId ? styles.inputError : ''}`}
+                                className={`${styles.input} ${errors.licensePlate ? styles.inputError : ''}`}
                             />
-                            {errors.vehicleId && <div className={styles.errorMessage}>{errors.vehicleId}</div>}
+                            {errors.licensePlate && <div className={styles.errorMessage}>{errors.licensePlate}</div>}
                         </div>
 
                         <div className={styles.buttonGroup}>

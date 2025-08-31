@@ -3,6 +3,9 @@ import { createError } from '../middleware/errorHandler.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,6 +15,7 @@ class VehicleService {
     this.rpcUrl = process.env.SEPOLIA_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID';
     this.privateKey = process.env.SEPOLIA_PRIVATE_KEY;
     this.contractAddress = process.env.CONTRACT_ADDRESS;
+    
     
     // Configurar provider
     this.provider = new ethers.JsonRpcProvider(this.rpcUrl);
