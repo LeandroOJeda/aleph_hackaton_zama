@@ -11,12 +11,12 @@ export declare class SeedService {
     private vehicleRepository;
     private eventRepository;
     constructor(userRepository: Repository<User>, roleRepository: Repository<Role>, organizationRepository: Repository<Organization>, vehicleRepository: Repository<Vehicle>, eventRepository: Repository<Event>);
-    seed(): Promise<void>;
+    seed(): any;
     private createRoles;
     private createOrganizations;
     private createUsers;
     private getRoleDescription;
     private createVehicles;
     private createEvents;
-    clearDatabase(): Promise<void>;
+    clearDatabase(): any;
 }
