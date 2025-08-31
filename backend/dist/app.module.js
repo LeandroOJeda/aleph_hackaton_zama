@@ -14,6 +14,9 @@ const typeorm_1 = require("@nestjs/typeorm");
 const common_module_1 = require("./common/common.module");
 const guests_module_1 = require("./guests/guests.module");
 const database_module_1 = require("./database/database.module");
+const organizations_module_1 = require("./organizations/organizations.module");
+const vehicles_module_1 = require("./vehicles/vehicles.module");
+const events_module_1 = require("./events/events.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,6 +38,9 @@ exports.AppModule = AppModule = __decorate([
             common_module_1.CommonModule,
             guests_module_1.GuestsModule,
             database_module_1.DatabaseModule,
+            organizations_module_1.OrganizationsModule,
+            vehicles_module_1.VehiclesModule,
+            events_module_1.EventsModule,
         ],
         controllers: [],
         providers: [],

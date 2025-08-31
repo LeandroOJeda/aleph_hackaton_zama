@@ -12,13 +12,16 @@ const typeorm_1 = require("@nestjs/typeorm");
 const seed_service_1 = require("./seed.service");
 const user_entity_1 = require("../auth/entities/user.entity");
 const role_entity_1 = require("../auth/entities/role.entity");
+const organization_entity_1 = require("../organizations/entities/organization.entity");
+const vehicle_entity_1 = require("../vehicles/entities/vehicle.entity");
+const event_entity_1 = require("../events/entities/event.entity");
 let DatabaseModule = class DatabaseModule {
 };
 exports.DatabaseModule = DatabaseModule;
 exports.DatabaseModule = DatabaseModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, role_entity_1.Role])
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, role_entity_1.Role, organization_entity_1.Organization, vehicle_entity_1.Vehicle, event_entity_1.Event])
         ],
         providers: [seed_service_1.SeedService],
         exports: [seed_service_1.SeedService]

@@ -24,6 +24,7 @@ export declare class AuthService {
         firstTime: boolean;
         createdAt: Date;
         roles: Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     loginUser(loginUserDto: LoginUserDto): Promise<{
         accessToken: string;
@@ -37,6 +38,7 @@ export declare class AuthService {
         firstTime: boolean;
         createdAt: Date;
         roles: Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     refreshToken(user: User): Promise<{
         accessToken: string;
@@ -50,6 +52,7 @@ export declare class AuthService {
         firstTime: boolean;
         createdAt: Date;
         roles: Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     changeDefaultPassword(changeDefaultPasswordDto: ChangeDefaultPasswordDto): Promise<{
         accessToken: string;
@@ -63,6 +66,7 @@ export declare class AuthService {
         firstTime: boolean;
         createdAt: Date;
         roles: Role[];
+        organization: import("../organizations/entities/organization.entity").Organization;
     }>;
     private handleDBError;
     private getJwtToken;

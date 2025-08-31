@@ -92,9 +92,14 @@ export class AuthService {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
-        select: { email: true, password: true, id: true, firstTime: true },
+        select: { email: true, id: true, firstTime: true },
         relations: ['roles'],
       });
+      
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+      
       return {
         ...user,
         accessToken: this.getJwtToken({ id: user.id }, '24h'),
@@ -103,6 +108,7 @@ export class AuthService {
     } catch (error) {
       if (error.name === 'TokenExpiredError')
         throw new UnauthorizedException('Refresh token expired or invalid');
+      throw error;
     }
   }
 

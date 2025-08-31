@@ -5,10 +5,11 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
-// import { Role } from './role.entity';
+import { Organization } from '../../organizations/entities/organization.entity';
 
 @Entity('users')
 export class User {
@@ -39,6 +40,12 @@ export class User {
   @ManyToMany(() => Role)
   @JoinTable()
   roles: Role[];
+
+  @ManyToOne(() => Organization, (organization) => organization.users, {
+    nullable: true,
+    eager: false,
+  })
+  organization: Organization;
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {

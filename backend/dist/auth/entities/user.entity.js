@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const role_entity_1 = require("./role.entity");
+const organization_entity_1 = require("../../organizations/entities/organization.entity");
 let User = class User {
     checkFieldsBeforeInsert() {
         this.email = this.email.toLowerCase().trim();
@@ -58,6 +59,13 @@ __decorate([
     (0, typeorm_1.JoinTable)(),
     __metadata("design:type", Array)
 ], User.prototype, "roles", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => organization_entity_1.Organization, (organization) => organization.users, {
+        nullable: true,
+        eager: false,
+    }),
+    __metadata("design:type", organization_entity_1.Organization)
+], User.prototype, "organization", void 0);
 __decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),

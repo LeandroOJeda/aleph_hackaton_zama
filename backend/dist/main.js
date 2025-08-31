@@ -6,7 +6,7 @@ const common_1 = require("@nestjs/common");
 async function main() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
-        origin: ['http://localhost:3000', 'https://localhost:5000'],
+        origin: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         credentials: true,
     });

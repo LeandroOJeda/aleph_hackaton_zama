@@ -1,0 +1,181 @@
+.form {
+  width: 85%;
+}
+
+.bigDiv {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to bottom right,
+      rgba(62, 108, 81, 0.1),
+      rgba(62, 108, 81, 0.9)),
+    url("./../../image/tramaEcoGris.svg");
+  background-size: 100%;
+  background-repeat: repeat;
+  padding: 2em 0;
+  width: 100%;
+}
+
+.divForm {
+  min-height: 32em;
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2em;
+  background-color: #eaeaea;
+  border: 1px solid #9c9c9c;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.titulo {
+  margin-bottom: 1.5em;
+  color: #17a2b8;
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.divInput {
+  width: 100%;
+  margin-bottom: 1.5em;
+  display: flex;
+  flex-direction: column;
+}
+
+.divInput input,
+.divInput .textarea {
+  width: 100%;
+  padding: 0.75em;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.divInput input:focus,
+.divInput .textarea:focus {
+  outline: none;
+  border-color: #17a2b8;
+  box-shadow: 0 0 5px rgba(23, 162, 184, 0.3);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 4em;
+  font-family: inherit;
+}
+
+.inputError {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 5px rgba(220, 53, 69, 0.3) !important;
+}
+
+.errorLabel {
+  color: #dc3545;
+  font-weight: bold;
+  font-size: 0.8em;
+  margin-top: 0.25em;
+  margin-left: 0.25em;
+}
+
+.divButton {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  margin-top: 1em;
+}
+
+.button1,
+.button2 {
+  flex: 1;
+  padding: 0.75em 1.5em;
+  border: none;
+  border-radius: 4px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button1 {
+  background-color: #6c757d;
+  color: white;
+}
+
+.button1:hover:not(:disabled) {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+}
+
+.button2 {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.button2:hover:not(:disabled) {
+  background-color: #138496;
+  transform: translateY(-1px);
+}
+
+.button1:disabled,
+.button2:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  margin-top: 1em;
+  padding: 0.75em;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.successMessage {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.errorMessage {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Dispositivos móviles */
+@media (max-width: 767px) {
+  .divForm {
+    width: 90%;
+    padding: 1.5em;
+  }
+
+  .titulo {
+    font-size: 1.2em;
+  }
+
+  .divButton {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .button1,
+  .button2 {
+    width: 100%;
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .divForm {
+    width: 60%;
+  }
+}

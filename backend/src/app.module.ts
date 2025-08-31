@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from './common/common.module';
 import { GuestsModule } from './guests/guests.module';
 import { DatabaseModule } from './database/database.module';
+import { OrganizationsModule } from './organizations/organizations.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { DatabaseModule } from './database/database.module';
     CommonModule,
     GuestsModule,
     DatabaseModule,
+    OrganizationsModule,
+    VehiclesModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [],
