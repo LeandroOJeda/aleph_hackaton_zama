@@ -43,6 +43,6 @@ module.exports = {
     }
   },
   fhevm: {
-    mock: false
+    mock: true
   }
 };

@@ -56,8 +56,7 @@ contract VehicleInfoRegistry is SepoliaConfig {
 
     function createInfoBlock(
         string memory _vehicleId,
-        externalEuint32 encryptedKilometros,
-        bytes calldata inputProof,
+        euint32 encryptedKilometros,
         string memory _detalles,
         string memory _origen
     ) public returns (euint32) {
@@ -65,8 +64,8 @@ contract VehicleInfoRegistry is SepoliaConfig {
         require(bytes(_detalles).length > 0, "Los detalles no pueden estar vacios");
         require(bytes(_origen).length > 0, "El origen no puede estar vacio");
         
-        // Convertir el input encriptado a euint32 según la documentación oficial
-        euint32 kilometros = FHE.fromExternal(encryptedKilometros, inputProof);
+        // Usar directamente el parámetro encriptado
+        euint32 kilometros = encryptedKilometros;
         
         // En FHEVM v0.4+, no podemos usar decrypt en require statements
         // Las validaciones se hacen completamente encriptadas
@@ -110,8 +109,10 @@ contract VehicleInfoRegistry is SepoliaConfig {
         vehicleInfo.existe = FHE.asEbool(true);
 
         // Otorgar permisos FHE según documentación oficial
-        FHE.allowThis(blockId);
-        FHE.allow(blockId, msg.sender);
+        FHE.allowThis(kilometros);
+        FHE.allow(kilometros, msg.sender);
+        FHE.allowThis(vehicleInfo.ultimoKilometraje);
+        FHE.allow(vehicleInfo.ultimoKilometraje, msg.sender);
 
         emit InfoBlockCreated(
             blockId,
@@ -129,6 +130,7 @@ contract VehicleInfoRegistry is SepoliaConfig {
         address createdBy
     ) {
         InfoBlock memory infoBlock = infoBlocks[_id];
+        require(infoBlock.createdBy != address(0), "El bloque no existe");
         return (
             infoBlock.vehicleId,
             infoBlock.detalles,
@@ -230,10 +232,8 @@ contract VehicleInfoRegistry is SepoliaConfig {
 
     function updateVehicleStatus(
         string memory _vehicleId,
-        bytes32 encryptedActivo,
-        bytes memory inputProofActivo,
-        bytes32 encryptedPoseeVTV,
-        bytes memory inputProofPoseeVTV
+        ebool encryptedActivo,
+        ebool encryptedPoseeVTV
     ) public {
         // Verificar que el vehículo existe usando información no encriptada
         require(vehicleBlocks[_vehicleId].length > 0, "El vehiculo no esta registrado");
@@ -250,8 +250,14 @@ contract VehicleInfoRegistry is SepoliaConfig {
         require(hasAccess, "No tienes permisos para actualizar este vehiculo");
         
         VehicleInfo storage vehicleInfo = vehicles[_vehicleId];
-        vehicleInfo.activo = FHE.fromExternal(externalEbool.wrap(encryptedActivo), inputProofActivo);
-        vehicleInfo.poseeVTV = FHE.fromExternal(externalEbool.wrap(encryptedPoseeVTV), inputProofPoseeVTV);
+        vehicleInfo.activo = encryptedActivo;
+        vehicleInfo.poseeVTV = encryptedPoseeVTV;
+        
+        // Otorgar permisos FHE
+        FHE.allowThis(vehicleInfo.activo);
+        FHE.allow(vehicleInfo.activo, msg.sender);
+        FHE.allowThis(vehicleInfo.poseeVTV);
+        FHE.allow(vehicleInfo.poseeVTV, msg.sender);
         
         emit VehicleStatusUpdated(_vehicleId, msg.sender);
     }

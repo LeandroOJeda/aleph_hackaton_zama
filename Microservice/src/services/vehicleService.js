@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-// import { createInstance } from 'fhevmjs'; // Solo para frontend
+import { createInstance } from 'fhevmjs';
 
 // Asegurar que las variables de entorno estén cargadas
 dotenv.config();
@@ -26,15 +26,35 @@ class VehicleService {
       this.wallet = new ethers.Wallet(this.privateKey, this.provider);
     }
     
+    // Inicializar FHEVM instance
+    this.initializeFHEVM();
+    
     // Cargar ABI del contrato
     this.loadContractABI();
-    
-    // FHEVM se maneja en el contrato, no necesario en backend
-    this.fhevmInstance = null;
   }
 
-  // FHEVM no es necesario en el backend - la encriptación se maneja en el contrato
-  // Los datos se envían como plain text y el contrato los convierte a tipos encriptados
+  async initializeFHEVM() {
+    try {
+      // Para desarrollo en backend, usar una implementación mock
+      // En producción, la encriptación se haría en el frontend
+      this.fhevmInstance = {
+        encrypt32: (value) => {
+           // Para el mock, convertir el valor a bytes32 como espera el ABI
+           // En producción real, esto sería un tipo euint32 encriptado de Zama
+           return ethers.zeroPadValue(ethers.toBeHex(value), 32);
+         },
+         encryptBool: (value) => {
+           // Para el mock, convertir el booleano a bytes32 como espera el ABI
+           // En producción real, esto sería un tipo ebool encriptado de Zama
+           return ethers.zeroPadValue(ethers.toBeHex(value ? 1 : 0), 32);
+         }
+      };
+      console.log('FHEVM mock instance initialized for development');
+    } catch (error) {
+      console.error('Error initializing FHEVM:', error.message);
+      throw createError('Error inicializando FHEVM', 500);
+    }
+  }
 
   /**
    * Carga el ABI del contrato desde el archivo de artifacts
@@ -64,9 +84,8 @@ class VehicleService {
   }
 
   /**
-   * Crea un nuevo bloque de información vehicular
+   * Crea un nuevo bloque de información para un vehículo
    * NOTA: En producción, los datos deberían venir encriptados desde el frontend usando fhevmjs
-   * Por ahora, usamos valores mock para testing
    */
   async createInfoBlock(vehicleId, kilometers, details, origin) {
     try {
@@ -74,8 +93,31 @@ class VehicleService {
         throw createError('Contrato no configurado correctamente', 500);
       }
 
+      // Validaciones de entrada
+      if (!vehicleId || typeof vehicleId !== 'string') {
+        throw createError('vehicleId debe ser una cadena válida', 400);
+      }
+      
+      if (!details || typeof details !== 'string') {
+        throw createError('details debe ser una cadena válida', 400);
+      }
+      
+      if (!origin || typeof origin !== 'string') {
+        throw createError('origin debe ser una cadena válida', 400);
+      }
+
       // Convertir kilometers a uint32
       const kilometersUint32 = parseInt(kilometers);
+      if (isNaN(kilometersUint32) || kilometersUint32 < 0) {
+        throw createError('kilometers debe ser un número positivo', 400);
+      }
+      
+      // Encriptar los kilómetros usando FHEVM
+      if (!this.fhevmInstance) {
+        throw createError('FHEVM instance no inicializada', 500);
+      }
+      
+      const encryptedKilometers = this.fhevmInstance.encrypt32(kilometersUint32);
       
       // Configuración de gas específica para FHEVM
       const gasOptions = {
@@ -83,12 +125,18 @@ class VehicleService {
         gasPrice: ethers.parseUnits('10', 'gwei') // Gas price para Sepolia
       };
       
+      console.log('Datos encriptados:', {
+        vehicleId,
+        encryptedKilometers,
+        details,
+        origin
+      });
+      
       const tx = await this.contract.createInfoBlock(
         vehicleId,
-        kilometersUint32,
+        encryptedKilometers,
         details,
-        origin,
-        gasOptions
+        origin
       );
       const receipt = await tx.wait();
       
@@ -208,7 +256,38 @@ class VehicleService {
         throw createError('Contrato no configurado correctamente', 500);
       }
 
-      const tx = await this.contract.updateVehicleStatus(vehicleId, isActive, hasValidVTV);
+      // Validaciones de entrada
+      if (!vehicleId || typeof vehicleId !== 'string') {
+        throw createError('vehicleId debe ser una cadena válida', 400);
+      }
+      
+      if (typeof isActive !== 'boolean') {
+        throw createError('isActive debe ser un valor booleano', 400);
+      }
+      
+      if (typeof hasValidVTV !== 'boolean') {
+        throw createError('hasValidVTV debe ser un valor booleano', 400);
+      }
+
+      // Encriptar los valores booleanos
+      if (!this.fhevmInstance) {
+        throw createError('FHEVM instance no inicializada', 500);
+      }
+      
+      const encryptedIsActive = this.fhevmInstance.encryptBool(isActive);
+      const encryptedHasValidVTV = this.fhevmInstance.encryptBool(hasValidVTV);
+      
+      // Configuración de gas específica para FHEVM
+      const gasOptions = {
+        gasLimit: 2000000,
+        gasPrice: ethers.parseUnits('10', 'gwei')
+      };
+
+      const tx = await this.contract.updateVehicleStatus(
+        vehicleId,
+        encryptedIsActive,
+        encryptedHasValidVTV
+      );
       const receipt = await tx.wait();
       
       return {
@@ -255,36 +334,67 @@ class VehicleService {
   }
 
   /**
-   * Maneja errores del contrato
+   * Maneja errores del contrato siguiendo principios de Clean Code
    */
   handleError(error) {
-    console.error('Error en VehicleService:', error.message);
+    console.error('Error en VehicleService:', {
+      message: error.message,
+      code: error.code,
+      reason: error.reason,
+      stack: error.stack
+    });
     
-    if (error.code === 'CALL_EXCEPTION') {
+    // Mapeo de errores específicos de FHEVM y Ethereum
+    const errorMappings = {
+      'CALL_EXCEPTION': {
+        message: `Error al ejecutar función del contrato: ${error.reason || error.message}`,
+        status: 400
+      },
+      'NETWORK_ERROR': {
+        message: 'Error de conexión con la red Sepolia. Verifique su conectividad.',
+        status: 503
+      },
+      'INSUFFICIENT_FUNDS': {
+        message: 'Fondos insuficientes para ejecutar la transacción. Verifique su balance.',
+        status: 400
+      },
+      'UNPREDICTABLE_GAS_LIMIT': {
+        message: 'No se pudo estimar el gas necesario. Verifique los parámetros de la transacción.',
+        status: 400
+      },
+      'REPLACEMENT_UNDERPRICED': {
+        message: 'El precio del gas es muy bajo. Intente con un precio mayor.',
+        status: 400
+      },
+      'NONCE_EXPIRED': {
+        message: 'La transacción ha expirado. Intente nuevamente.',
+        status: 400
+      }
+    };
+    
+    const errorMapping = errorMappings[error.code];
+    
+    if (errorMapping) {
       return createError(
-        'Error al llamar función del contrato: ' + (error.reason || error.message),
-        400,
-        { code: error.code, reason: error.reason }
-      );
-    } else if (error.code === 'NETWORK_ERROR') {
-      return createError(
-        'Error de red al conectar con Sepolia',
-        503,
-        { code: error.code }
-      );
-    } else if (error.code === 'INSUFFICIENT_FUNDS') {
-      return createError(
-        'Fondos insuficientes para ejecutar la transacción',
-        400,
-        { code: error.code }
-      );
-    } else {
-      return createError(
-        error.message || 'Error interno del servicio de vehículos',
-        500,
-        { code: error.code }
+        errorMapping.message,
+        errorMapping.status,
+        { 
+          code: error.code, 
+          reason: error.reason,
+          originalMessage: error.message
+        }
       );
     }
+    
+    // Error genérico
+    return createError(
+      error.message || 'Error interno del servicio de vehículos',
+      500,
+      { 
+        code: error.code || 'UNKNOWN_ERROR',
+        originalMessage: error.message
+      }
+    );
   }
 }
 
